@@ -1,7 +1,6 @@
-from enum import Enum
+from enum import Enum, unique
 
-# PinoutEnum is used to autogenerate all the pin indices in the GPIO map
-# starting from zero. By default `auto()` starts at 1.
+
 class PinoutEnum(Enum):
     def __new__(self):
         value = len(self.__members__)
@@ -9,7 +8,8 @@ class PinoutEnum(Enum):
         obj._value_ = value
         return obj
 
-# Pinout maps a pin name to its offset in the GPIO memory map
+
+@unique
 class Pinout(PinoutEnum):
     PA0  = ()
     PA1  = ()
