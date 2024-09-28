@@ -1,5 +1,5 @@
 from gpio import GPIOMap
-from gpio.mode import PinMode, PinState
+from gpio.mode import PinMode
 from gpio.pinout import Pinout
 
 def main() -> int:
