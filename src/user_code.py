@@ -1,6 +1,7 @@
 import signal
 import subprocess
 
+from clock import Clock
 from control import CTRLMap
 from gpio import GPIOMap
 
@@ -21,6 +22,7 @@ class UserCode:
         
         self._ctrl_map = CTRLMap(self.name)
         self._gpio_map = GPIOMap(self.name)
+        self._clock = Clock(self.name, self.signal, self._ctrl_map)
 
     
     def signal(self, sig: signal.Signals):
@@ -45,8 +47,13 @@ class UserCode:
         self._process = None
         if self._gpio_map:
             self._gpio_map.close()
+            self._gpio_map = None
         if self._ctrl_map:
             self._ctrl_map.close()
+            self._ctrl_map = None
+        if self._clock:
+            self._clock.close()
+            self._clock = None
 
     class AlreadyRunningError(Exception):
         def __init__(self, name: str):
