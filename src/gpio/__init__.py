@@ -4,7 +4,7 @@ from .mode import PinMode, UnusedPinError
 from .pinout import Pinout
 
 class GPIOMap:
-    _pin_byte_size = 4 # CHANGE THIS VALUE TO MATCH THE FUTURE UNION TYPE
+    _pin_byte_size = 4 # TODO: adjust this value
 
     def __init__(self, name: str, create: bool = True):
         self._pins = len(Pinout)
