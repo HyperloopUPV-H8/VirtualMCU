@@ -24,7 +24,22 @@ class Fulfilled(Condition):
 
 
 # Always fails
-class FailedCondition(Condition):
+class Failed(Condition):
 
     async def check(self):
         raise ConditionFailedException()
+
+
+# Negates the result of the condition
+class Not(Condition):
+
+    def __init__(self, condition: Condition):
+        self._condition = condition
+
+    async def check(self):
+        try:
+            fulfilled = await self._condition.check()
+        except ConditionFailedException as failed:
+            return failed
+        
+        raise fulfilled
