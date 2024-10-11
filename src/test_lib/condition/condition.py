@@ -13,7 +13,10 @@ class Condition(ABC):
 
 
 # All condition failure exceptions should inherit this one
-class ConditionFailedException(Exception): ...
+class ConditionFailedException(Exception):
+
+    def __str__(self):
+        return "condition failed"
 
 
 # Always gets fulfilled
@@ -42,4 +45,13 @@ class Not(Condition):
         except ConditionFailedException as failed:
             return failed
         
-        raise fulfilled
+        raise Not.Fulfilled(fulfilled)
+
+
+    class Fulfilled(ConditionFailedException):
+
+        def __init__(self, result):
+            self.result = result
+
+        def __str__(self):
+            return f"condition fulfilled: {self.result}"

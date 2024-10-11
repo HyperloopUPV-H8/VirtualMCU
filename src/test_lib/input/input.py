@@ -13,4 +13,7 @@ class Input(ABC):
 
 
 # All Input failure exceptions should extend this class
-class InputFailedException(Exception): ...
+class InputFailedException(Exception):
+
+    def __str__(self):
+        return "input failed"

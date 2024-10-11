@@ -55,7 +55,7 @@ class After(Condition):
             self.result = result
 
         def __str__(self):
-            return f"Condition fulfilled before deadline with result \"{self.result}\""
+            return f"condition fulfilled before deadline: {self.result}"
 
 
 # Delay a condition check

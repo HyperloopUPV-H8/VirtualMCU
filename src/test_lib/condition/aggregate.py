@@ -45,4 +45,4 @@ class Any(Condition):
             self.failures = failures
 
         def __str__(self):
-            return f"All conditions failed: {", ".join([str(failure) for failure in self.failures])}"
+            return f"all conditions failed: {", ".join([str(failure) for failure in self.failures])}"
