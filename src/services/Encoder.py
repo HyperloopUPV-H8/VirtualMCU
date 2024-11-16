@@ -3,10 +3,8 @@ from src.pin.pinout import Pinout
 import src.pin.memory as memory
 from ctypes import c_uint32
 from enum import Enum, auto, unique
-
+registered_encoder = []
 class Encoder:
-    registered_encoder = []
-
     def __init__(self,pin1: Pinout, pin2: Pinout):
         if (pin1,pin2) not in Encoder.registered_encoder:
             #register the pins 
@@ -26,7 +24,5 @@ class Encoder:
         self._pin1.data.counter = self._pin2.data.counter = counter_value
     
     def increase_counter(self) -> None:
-        actual_counter_value = self._pin1.data.counter
-        new_counter_value = actual_counter_value + 1
-        self._pin1.data.counter = self._pin2.data.counter = new_counter_value
+        self.set_counter(self._pin1.data.counter +1)
         
