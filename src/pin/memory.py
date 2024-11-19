@@ -133,3 +133,8 @@ class DualPWM(PinMemoryView):
     @property
     def dead_time_ns(self) -> int:
         return struct.unpack("=l", self._mem[9:13])[0]
+
+class SPI(PinMemoryView):
+    @property
+    def is_on(self) -> bool:
+        return struct.unpack("=?", self._mem[0:1])[0]
