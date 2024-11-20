@@ -11,6 +11,7 @@ from .memory import (
     InputCapture,
     PWM,
     DualPWM,
+    SPI
 )
 
 @unique
@@ -24,6 +25,7 @@ class PinType(Enum):
     InputCapture = auto()
     PWM = auto()
     DualPWM = auto()
+    SPI = auto()
     # TODO: add missing types
 
 class DualPWM: ...
@@ -31,7 +33,7 @@ class DualPWM: ...
 class Pin:
     _pin_type_offset_in_memory = 0
 
-    _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM
+    _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM | SPI
 
     def __init__(self, pin: Pinout, shm: memoryview, pin_type: PinType = None):
         self._pin = pin
