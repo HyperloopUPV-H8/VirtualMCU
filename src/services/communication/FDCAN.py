@@ -63,7 +63,7 @@ class FDCAN:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.port = port
         self.ip = ip
-        self.Instance.sock.bind((self.ip,self.port))
+        self.sock.bind((self.ip,self.port))
     
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
