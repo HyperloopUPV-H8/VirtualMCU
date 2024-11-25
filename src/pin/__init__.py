@@ -11,6 +11,7 @@ from .memory import (
     InputCapture,
     PWM,
     DualPWM,
+    FDCAN,
 )
 
 @unique
@@ -24,6 +25,7 @@ class PinType(Enum):
     InputCapture = auto()
     PWM = auto()
     DualPWM = auto()
+    FDCAN = auto()
     # TODO: add missing types
 
 class DualPWM: ...
@@ -81,6 +83,9 @@ class Pin:
             self._data = PWM(self._mem[1:])
         elif self.type == PinType.DualPWM:
             self._data = DualPWM(self._mem[1:])
+        elif self.type == PinType.FDCAN:
+            self._data = FDCAN(self._mem[1:])
+            
         # TODO: add missing types
         else:
             self._data = None
