@@ -5,7 +5,6 @@ from enum import Enum
 import socket
 
 class FDCAN:
-    ip: str = ""
     class DLC(Enum):
         BYTES_0 = 0x00000000
         BYTES_1 = 0x00010000
@@ -49,13 +48,9 @@ class FDCAN:
             self.identifier: int = identifier
             self.data_length: FDCAN.DLC = data_length
     
-    class Instance:
-        port = None
-        sock = None
-        start = False
-        def __init__(self, TX, RX):
-            self._TX = TX
-            self._RX = RX
+    ip: str = ""
+    sock = None
+    port:int = None
             
             
    
@@ -64,19 +59,14 @@ class FDCAN:
         self._RX = SharedMemory.get_pin(RX, memory.PinType.FDCAN)
     
     def start(self, ip: str, port: int):
-        self.Instance(self._TX, self._RX)
-        self.Instance.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.Instance.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.Instance.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.port = port
         self.ip = ip
         self.Instance.sock.bind((self.ip,self.port))
-        self.Instance.start = True
-    
     
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
-        if not self.Instance.start:
-            return False
         data_length = self.dlc_to_len[data_length]
         aux_data = b""
         aux_data += (message_id >> 24)
@@ -90,19 +80,17 @@ class FDCAN:
         aux_data += data
         totalsent = 0
         while totalsent < len(aux_data):
-            sent = self.Instance.sock.sendto(aux_data[totalsent:], (FDCAN.ip, self.port))
+            sent = self.sock.sendto(aux_data[totalsent:], (FDCAN.ip, self.port))
             if sent <=0:
                 return False
             totalsent += sent
         return True
         
     def read(self )->Packet:
-        if not self.Instance.start:
-            return None
         aux_data = b""
         bytes_recv = 0
         while chunk_aux_data>0 or bytes_recv<72:
-            chunk_aux_data= self.Instance.sock.recvfrom(72)
+            chunk_aux_data= self.sock.recvfrom(72)
             aux_data += chunk_aux_data
             bytes_recv += len(chunk_aux_data)
         
