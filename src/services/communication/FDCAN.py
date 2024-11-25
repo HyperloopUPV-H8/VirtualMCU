@@ -48,9 +48,9 @@ class FDCAN:
             self.identifier: int = identifier
             self.data_length: FDCAN.DLC = data_length
     
-    ip: str = ""
-    sock = None
-    port:int = None
+    _ip: str = ""
+    _sock = None
+    _port:int = None
             
             
    
@@ -59,11 +59,11 @@ class FDCAN:
         self._RX = SharedMemory.get_pin(RX, memory.PinType.FDCAN)
     
     def start(self, ip: str, port: int):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.port = port
-        self.ip = ip
-        self.sock.bind((self.ip,self.port))
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self._port = port
+        self._ip = ip
+        self._sock.bind((self.ip,self.port))
     
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
@@ -80,7 +80,7 @@ class FDCAN:
         aux_data += data
         totalsent = 0
         while totalsent < len(aux_data):
-            sent = self.sock.sendto(aux_data[totalsent:], (FDCAN.ip, self.port))
+            sent = self._sock.sendto(aux_data[totalsent:], (FDCAN.ip, self.port))
             if sent <=0:
                 return False
             totalsent += sent
@@ -90,7 +90,7 @@ class FDCAN:
         aux_data = b""
         bytes_recv = 0
         while chunk_aux_data>0 or bytes_recv<72:
-            chunk_aux_data= self.sock.recvfrom(72)
+            chunk_aux_data= self._sock.recvfrom(72)
             aux_data += chunk_aux_data
             bytes_recv += len(chunk_aux_data)
         
