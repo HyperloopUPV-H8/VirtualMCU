@@ -22,7 +22,6 @@ class Server:
         
         
     def _accept(self) : 
-        print("entrado al accept")
         self._server.listen(MAX_LISTEN_CONNECTIONS)
         while self._running:
             try:
@@ -40,13 +39,13 @@ class Server:
                 print(f"Error accepting connection: {e}")
 
     def _receive(self,connection, client_address):
-        print("Conexiones antes de eliminar:")
+        print("Connections established with the server socket:")
         print(self.connections)
         while self._running:
             try:
                 data = connection.recv(MAX_SIZE_PACKET)
                 if not data:
-                    print(f"Close connection with {client_address}")
+                    print(f"Closed connection with {client_address}")
                     break
                 self._queue_packet_receive_dictionary[client_address].put(data)
             except socket.timeout:
@@ -57,8 +56,6 @@ class Server:
         connection.close()
         if client_address in self.connections:
             del self.connections[client_address]
-        print("Conexiones despues de eliminar:")
-        print(self.connections)
 
 
     def transmit(self,buf: bytes,   client_address : tuple[str,int]): 
