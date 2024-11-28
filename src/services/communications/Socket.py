@@ -66,4 +66,6 @@ class Socket:
             return None
         return self._queue_packet_received.get()    
     
+    def __del__(self):
+        self.stop()
     

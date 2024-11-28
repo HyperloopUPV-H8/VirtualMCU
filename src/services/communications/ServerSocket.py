@@ -99,6 +99,7 @@ class Server:
         
     def is_running(self) -> bool:
         return self._running
-    
+    def __del__(self):
+        self.stop()
     
     
