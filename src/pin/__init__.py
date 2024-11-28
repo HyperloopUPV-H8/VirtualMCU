@@ -1,5 +1,4 @@
 from enum import Enum, auto, unique
-from shared_memory import SharedMemory
 
 from .pinout import Pinout
 from .memory import (
@@ -15,7 +14,7 @@ from .memory import (
 
 @unique
 class PinType(Enum):
-    NotUsed = auto()
+    NotUsed = 0
     DigitalOut = auto()
     DigitalIn = auto()
     ADC = auto()
@@ -37,6 +36,8 @@ class Pin:
         self._pin = pin
         self._mem = Pin._get_memory_view(pin, shm)
 
+        print("PinType", pin_type)
+
         if (pin_type != None):
             self._check_type_is_same_as(pin_type)
         self._type = pin_type
@@ -53,13 +54,14 @@ class Pin:
 
     # returns a memoryview of the exact bytes that represent this pin
     def _get_memory_view(pin: Pinout, shm: memoryview) -> memoryview:
+        from shared_memory import SharedMemory
         base_address = pin.value * SharedMemory.pin_size_in_memory
         return shm[base_address:base_address + SharedMemory.pin_size_in_memory]
 
     # throws an exception if the pin type is different
     def _check_type_is_same_as(self, pin_type: PinType):
-        stored_pin_type = self._mem[Pin._pin_type_offset_in_memory]
-        if PinType(stored_pin_type) == pin_type:
+        stored_pin_type = PinType(self._mem[Pin._pin_type_offset_in_memory])
+        if stored_pin_type == pin_type:
             return
         raise DifferentPinType(pin_type, stored_pin_type)
 
