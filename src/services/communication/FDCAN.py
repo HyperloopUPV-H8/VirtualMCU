@@ -49,7 +49,7 @@ class FDCAN:
             
    
     def __init__(self, TX: Pinout, RX: Pinout):
-        shm1= SharedMemory("FDCAN") #He puesto esto para probar si funciona 
+        shm1= SharedMemory("FDCAN") #He puesto esto para probar si funciona pero antes solo llamaba de esta manera a SharedMemory: self._TX = SharedMemory.get_pin(TX, PinType.FDCAN)
         shm2 = SharedMemory("FDCAN")
         self._TX = shm1.get_pin(TX, PinType.FDCAN)
         self._RX = shm2.get_pin(RX, PinType.FDCAN)
