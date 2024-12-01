@@ -1,11 +1,9 @@
 from shared_memory import SharedMemory
-from pin import DigitalIn,Pinout,PinType
-
+from pin import DigitalIn,Pinout,PinType,Pin
 
 shm = SharedMemory("sim_tests")
 
-for i in range(128):
-    shm._gpio_shm.buf[i]=0x01
 
-while(1):
-    pass
+button=shm.get_pin(Pinout.PA0, PinType.DigitalIn)
+
+button.data.state=DigitalIn.State.High
