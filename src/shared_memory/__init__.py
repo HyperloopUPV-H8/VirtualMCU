@@ -1,10 +1,11 @@
 
+
 from multiprocessing import shared_memory
-from pin.pinout import Pinout
-from pin import Pin, PinType
+from src.pin.pinout import Pinout
+from src.pin import Pin, PinType
 
 class SharedMemory:
-    gpio_memory = memoryview()
+    
     pin_size_in_memory = 14 # Remember to keep in sync with C++
 
     def __init__(self, gpio_name):

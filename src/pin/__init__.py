@@ -1,5 +1,6 @@
+
 from enum import Enum, auto, unique
-from shared_memory import SharedMemory
+
 
 from .pinout import Pinout
 from .memory import (
@@ -55,6 +56,7 @@ class Pin:
 
     # returns a memoryview of the exact bytes that represent this pin
     def _get_memory_view(pin: Pinout, shm: memoryview) -> memoryview:
+        from src.shared_memory import SharedMemory
         base_address = pin.value * SharedMemory.pin_size_in_memory
         return shm[base_address:base_address + SharedMemory.pin_size_in_memory]
 
