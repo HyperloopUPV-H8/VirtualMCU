@@ -45,20 +45,22 @@ class FDCAN:
     _ip: str = ""
     _sock = None
     _port:int = None
+    _sendport:int = None
             
             
    
     def __init__(self, TX: Pinout, RX: Pinout):
-        shm1= SharedMemory("FDCAN") #He puesto esto para probar si funciona pero antes solo llamaba de esta manera a SharedMemory: self._TX = SharedMemory.get_pin(TX, PinType.FDCAN)
+        shm1= SharedMemory("FDCAN") 
         shm2 = SharedMemory("FDCAN")
         self._TX = shm1.get_pin(TX, PinType.FDCAN)
-        self._RX = shm2.get_pin(RX, PinType.FDCAN)
+        self._RX = shm2.get_pin(RX, PinType.FDCAN) 
     
-    def start(self, ip: str, port: int):
+    def start(self, ip: str, port: int,sendport:int):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self._port = port
         self._ip = ip
+        self._sendport = sendport
         self._sock.bind((self._ip,self._port))
         self._sock.settimeout(0.2)
         
@@ -74,9 +76,7 @@ class FDCAN:
         aux_data += ((data_length >> 8) & 0xFF).to_bytes(1, 'big')
         aux_data += ((data_length & 0xFF).to_bytes(1, 'big'))
         aux_data += data
-        sent = self._sock.sendto(aux_data, (self._ip, 7070))
-        print("sent: ", sent)
-        print("message sent!", flush=True)
+        sent = self._sock.sendto(aux_data, (self._ip, self._sendport))
         if sent <=0:
             return False
         return True

@@ -1,18 +1,19 @@
-import time
 from src.services.communication.FDCAN import FDCAN
-import src.pin.pinout as pin
+from src.pin.pinout import Pinout 
+import time
 
 
 
 
 
 
-ip = "127.0.0.1" #Por poner
-port = 7070 #Por poner
+ip = "127.0.0.1" 
+port = 7070 
+sendport = 6969 
 
 
-#fdcan1= FDCAN(pin.Pinout.PA1, pin.Pinout.PA2)
-fdcan1 = FDCAN(ip, port)
+fdcan1= FDCAN(Pinout.PA1, Pinout.PA2)
+fdcan1.start(ip, port,sendport)
 while(True):
     print("Reading...")
     packet = fdcan1.read()
