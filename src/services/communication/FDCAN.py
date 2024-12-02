@@ -62,7 +62,6 @@ class FDCAN:
         self._ip = ip
         self._sendport = sendport
         self._sock.bind((self._ip,self._port))
-        self._sock.settimeout(0.2)
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
         data_length = self.dlc_to_len[data_length]
