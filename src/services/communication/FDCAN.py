@@ -1,5 +1,5 @@
 from src.shared_memory import SharedMemory
-from src.pin import Pinout,FDCAN,PinType
+from src.pin import Pinout,PinType,FDCAN
 from enum import Enum
 import socket
 
@@ -49,11 +49,9 @@ class FDCAN:
             
             
    
-    def __init__(self, TX: Pinout, RX: Pinout):
-        shm1= SharedMemory("FDCAN") 
-        shm2 = SharedMemory("FDCAN")
-        self._TX = shm1.get_pin(TX, PinType.FDCAN)
-        self._RX = shm2.get_pin(RX, PinType.FDCAN) 
+    def __init__(self, TX: Pinout, RX: Pinout,shm:SharedMemory):
+        self._TX = shm.get_pin(TX, PinType.FDCAN)
+        self._RX = shm.get_pin(RX, PinType.FDCAN) 
     
     def start(self, ip: str, port: int,sendport:int):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
