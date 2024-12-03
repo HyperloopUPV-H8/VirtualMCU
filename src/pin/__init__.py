@@ -29,6 +29,17 @@ class PinType(Enum):
 class DualPWM: ...
 
 class Pin:
+    _pin_type_to_representation = {
+        PinType.DigitalOut: DigitalOut,
+        PinType.DigitalIn: DigitalIn,
+        PinType.ADC: ADC,
+        PinType.EXTI: EXTI,
+        PinType.Encoder: Encoder,
+        PinType.InputCapture: InputCapture,
+        PinType.PWM: PWM,
+        PinType.DualPWM: DualPWM,
+    }
+
     _pin_type_offset_in_memory = 0
 
     _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM
@@ -65,23 +76,8 @@ class Pin:
 
     # construct the class to access the actual pin data and store it
     def _init_data(self):
-        if self.type == PinType.DigitalOut:
-            self._data = DigitalOut(self._mem[1:])
-        elif self.type == PinType.DigitalIn:
-            self._data = DigitalIn(self._mem[1:])
-        elif self.type == PinType.ADC:
-            self._data = ADC(self._mem[1:])
-        elif self.type == PinType.EXTI:
-            self._data = EXTI(self._mem[1:])
-        elif self.type == PinType.Encoder:
-            self._data = Encoder(self._mem[1:])
-        elif self.type == PinType.InputCapture:
-            self._data = InputCapture(self._mem[1:])
-        elif self.type == PinType.PWM:
-            self._data = PWM(self._mem[1:])
-        elif self.type == PinType.DualPWM:
-            self._data = DualPWM(self._mem[1:])
-        # TODO: add missing types
+        if self.type in self._pin_type_to_representation:
+            self._data = self._pin_type_to_representation[self.type]
         else:
             self._data = None
 
