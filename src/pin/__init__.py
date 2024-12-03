@@ -79,7 +79,8 @@ class Pin:
     # construct the class to access the actual pin data and store it
     def _init_data(self):
         if self.type in self._pin_type_to_representation:
-            self._data = self._pin_type_to_representation[self.type]
+            pin_class = self._pin_type_to_representation[self.type]
+            self._data = pin_class(self._mem[1:])
         else:
             self._data = None
 

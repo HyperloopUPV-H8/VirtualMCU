@@ -1,9 +1,15 @@
-from shared_memory import SharedMemory
-from pin import DigitalIn,Pinout,PinType,Pin
+from src.shared_memory import SharedMemory
+from src.pin import DigitalIn,Pinout,PinType,Pin
+from src.services.digital_in import DigitalInService
+import time
 
 shm = SharedMemory("sim_tests")
 
 
-button=shm.get_pin(Pinout.PA0, PinType.DigitalIn)
 
-button.data.state=DigitalIn.State.High
+button=DigitalInService(shm,Pinout.PA0)
+
+for i in range(100):
+    button.toggle()
+    time.sleep(0.5)
+
