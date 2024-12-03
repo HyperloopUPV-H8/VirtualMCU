@@ -1,6 +1,5 @@
 from src.shared_memory import SharedMemory
-from src.pin.pinout import Pinout
-import src.pin.memory as memory
+from src.pin import Pinout,FDCAN,PinType
 from enum import Enum
 import socket
 
@@ -42,66 +41,75 @@ class FDCAN:
         DLC.BYTES_48: 48,
         DLC.BYTES_64: 64
     }
-    class Packet:
-        def __init__(self, identifier: int, data_length: "FDCAN.DLC"):
-            self.rx_data = b""
-            self.identifier: int = identifier
-            self.data_length: FDCAN.DLC = data_length
     
     _ip: str = ""
     _sock = None
     _port:int = None
+    _sendport:int = None
             
             
    
     def __init__(self, TX: Pinout, RX: Pinout):
-        self._TX = SharedMemory.get_pin(TX, memory.PinType.FDCAN)
-        self._RX = SharedMemory.get_pin(RX, memory.PinType.FDCAN)
+        shm1= SharedMemory("FDCAN") 
+        shm2 = SharedMemory("FDCAN")
+        self._TX = shm1.get_pin(TX, PinType.FDCAN)
+        self._RX = shm2.get_pin(RX, PinType.FDCAN) 
     
-    def start(self, ip: str, port: int):
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    def start(self, ip: str, port: int,sendport:int):
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self._port = port
         self._ip = ip
-        self._sock.bind((self.ip,self.port))
-    
+        self._sendport = sendport
+        self._sock.bind((self._ip,self._port))
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
         data_length = self.dlc_to_len[data_length]
         aux_data = b""
-        aux_data += (message_id >> 24)
-        aux_data += (message_id >> 16)
-        aux_data += (message_id >> 8)
-        aux_data += (message_id)
-        aux_data += (data_length >> 24)
-        aux_data += (data_length >> 16)
-        aux_data += (data_length >> 8)
-        aux_data += (data_length)
+        aux_data += ((message_id >> 24) & 0xFF).to_bytes(1, 'big')
+        aux_data += ((message_id >> 16) & 0xFF).to_bytes(1, 'big')
+        aux_data += ((message_id >> 8) & 0xFF).to_bytes(1, 'big')
+        aux_data += (message_id & 0xFF).to_bytes(1, 'big')
+        aux_data += ((data_length >> 24) & 0xFF).to_bytes(1, 'big')
+        aux_data += ((data_length >> 16) & 0xFF).to_bytes(1, 'big')
+        aux_data += ((data_length >> 8) & 0xFF).to_bytes(1, 'big')
+        aux_data += ((data_length & 0xFF).to_bytes(1, 'big'))
         aux_data += data
-        totalsent = 0
-        while totalsent < len(aux_data):
-            sent = self._sock.sendto(aux_data[totalsent:], (FDCAN.ip, self.port))
-            if sent <=0:
-                return False
-            totalsent += sent
+        sent = self._sock.sendto(aux_data, (self._ip, self._sendport))
+        if sent <=0:
+            return False
         return True
         
-    def read(self )->Packet:
+    def read(self )-> "Packet":
         aux_data = b""
         bytes_recv = 0
-        while chunk_aux_data>0 or bytes_recv<72:
-            chunk_aux_data= self._sock.recvfrom(72)
+        aux_dlc = 72
+        while bytes_recv < aux_dlc: 
+            chunk_aux_data = b""
+            chunk_aux_data,_= self._sock.recvfrom(1024)
+            if len(chunk_aux_data) <= 0:
+                break
             aux_data += chunk_aux_data
             bytes_recv += len(chunk_aux_data)
+            aux_identifier= (aux_data[0] << 24) | (aux_data[1] << 16) | (aux_data[2] << 8) | aux_data[3]
+            aux_dlc = ((aux_data[4] << 24) | (aux_data[5] << 16) | (aux_data[6] << 8) | aux_data[7])
         
         aux_identifier= (aux_data[0] << 24) | (aux_data[1] << 16) | (aux_data[2] << 8) | aux_data[3]
         aux_dlc = ((aux_data[4] << 24) | (aux_data[5] << 16) | (aux_data[6] << 8) | aux_data[7])
-        self.Packet(aux_identifier, aux_dlc)
-        self.Packet.rx_data = aux_data[8:]
-        return self.Packet
+        pack=Packet(aux_identifier, aux_dlc)
+        pack.rx_data = aux_data[8:]
+        return pack
             
             
-
+class Packet:
+        def __init__(self):
+            self.rx_data = b""
+            self.identifier: int = None
+            self.data_length: int = None
+        def __init__(self, identifier: int, data_length: "FDCAN.DLC"):
+            self.rx_data = b""
+            self.identifier: int = identifier
+            self.data_length: int = data_length
         
         
         
