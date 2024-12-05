@@ -1,10 +1,10 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
-import src.pin.memory as memory
+from src.pin import PinType,memory
 
 class PWM:
-    def __init__(self, pin: Pinout):
-        self._pin= SharedMemory.get_pin(pin, memory.PinType.PWM)
+    def __init__(self,shm: SharedMemory, pin: Pinout):
+        self._pin= shm.get_pin(pin, PinType.PWM)
 
     def get_is_on(self) -> bool:
         return self._pin.is_on
@@ -12,11 +12,11 @@ class PWM:
     def set_is_on(self, is_on:bool):
         self._pin.is_on = is_on
     
-    def set_frequency(self, frequency:int):
-        self._pin.frequency = frequency
+    def set_frequency(self, frequency:memory.PWM.frequency):
+        self._pin.data.frequency = frequency
     
-    def set_duty_cycle(self, duty_cycle:float):
-        self._pin.duty_cycle = duty_cycle
+    def set_duty_cycle(self, duty_cycle:memory.PWM.duty_cycle):
+        self._pin.data.duty_cycle = duty_cycle
     
     def get_frequency(self) -> int:
         return self._pin.frequency

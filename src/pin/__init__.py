@@ -1,7 +1,7 @@
 from enum import Enum, auto, unique
 
-from .pinout import Pinout
-from .memory import (
+from src.pin.pinout import Pinout
+from src.pin.memory import (
     DigitalOut,
     DigitalIn,
     ADC,
@@ -17,11 +17,11 @@ class PinType(Enum):
     NotUsed = 0
     DigitalOut = auto()
     DigitalIn = auto()
+    PWM = auto()
     ADC = auto()
     EXTI = auto()
     Encoder = auto()
     InputCapture = auto()
-    PWM = auto()
     DualPWM = auto()
     # TODO: add missing types
 
