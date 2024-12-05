@@ -9,6 +9,6 @@ class SharedMemory:
     def __init__(self, gpio_name):
         self._gpio_shm = shared_memory.SharedMemory(gpio_name, create=False)
 
-    def get_pin(self, pin: Pinout, pin_type: PinType = None) -> Pin:
-        return Pin(pin, self._gpio_shm.buf, pin_type=pin_type)
+    def get_pin(self, pin: Pinout, pin_type: PinType) -> Pin:
+        return Pin(pin, self._gpio_shm.buf, pin_type)
     
