@@ -7,9 +7,5 @@ class DigitalOutService:
         
     def get_pin_state(self) -> memory.DigitalOut.State:
         return self._pin.data.state
-        
-        
-    
-
 
     
