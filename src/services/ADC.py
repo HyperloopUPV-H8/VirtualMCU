@@ -20,5 +20,14 @@ class ADC:
         else:
             raise ValueError("Value is greater than the maximum voltage")
     
-   
+    class ValueInput(Input):
+        def __init__(self, adc, value):
+            self._adc = adc
+            self._value = value
+
+        def apply(self):
+            self._adc.set_value(self._value)
+
+    def generate_value(self, value: int) -> Input:
+        return self.ValueInput(self, value)
     

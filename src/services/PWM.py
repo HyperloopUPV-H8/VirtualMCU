@@ -22,11 +22,25 @@ class PWM:
         return self._pin.frequency
     
     def get_duty_cycle(self) -> float:
-        return self._pin.duty_cycle
+        return self._pin.duty_cycle 
     
     def set_dead_time_ns(self, dead_time_ns:int):
         self._pin.dead_time_ns = dead_time_ns
     
     def get_dead_time_ns(self) -> int:
         return self._pin.dead_time_ns
+
+    class WaitForDutyCondition(Condition):
+        def __init__(self, pwm, cond):
+            self._pwm = pwm
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._pwm.get_duty_cycle()):
+                pass
+            return True
+
+    def wait_for_duty(self, cond: function) -> Condition:
+        return PWM.WaitForDutyCondition(self, cond)
+
     
