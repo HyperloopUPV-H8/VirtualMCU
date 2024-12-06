@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vmcu_package"
-version = "0.0.2"
+version = "0.0.5"
 description = "A package to manage the resources of the STM32 simulator "
 readme = "README.md"
 requires-python = ">=3.8"
