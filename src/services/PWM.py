@@ -10,7 +10,7 @@ class PWM:
         return self._pin.is_on
     
     def set_is_on(self, is_on:bool):
-        self._pin.is_on = is_on
+        self._pin.data.is_on = is_on
     
     def set_frequency(self, frequency:memory.PWM.frequency):
         self._pin.data.frequency = frequency
@@ -19,14 +19,14 @@ class PWM:
         self._pin.data.duty_cycle = duty_cycle
     
     def get_frequency(self) -> int:
-        return self._pin.frequency
+        return self._pin.data.frequency
     
     def get_duty_cycle(self) -> float:
-        return self._pin.duty_cycle
+        return self._pin.data.duty_cycle
     
     def set_dead_time_ns(self, dead_time_ns:int):
-        self._pin.dead_time_ns = dead_time_ns
+        self._pin.data.dead_time_ns = dead_time_ns
     
     def get_dead_time_ns(self) -> int:
-        return self._pin.dead_time_ns
+        return self._pin.data.dead_time_ns
     
