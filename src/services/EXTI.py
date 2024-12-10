@@ -1,7 +1,8 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
 import src.pin.memory as memory
-
+from src.test_lib.input import Input
+from src.test_lib.condition import Condition
 class EXTI:
     def __init__(self, pin: Pinout, trigger_mode:memory.EXTI_Trigger_Mode):
         self._pin= SharedMemory.get_pin(pin, memory.PinType.EXTI)
@@ -15,3 +16,27 @@ class EXTI:
     
     def set_trigger_signal(self, trigger_signal:bool):
         self._pin.trigger_signal = trigger_signal
+    
+    class ExtiInput(Input):
+        def __init__(self, Exti,trigger_signal):
+            self._Exti = Exti
+            self._trigger_signal = trigger_signal
+
+        def apply(self):
+            self._Exti.set_trigger_signal(self._trigger_signal)
+
+    def generate_trigger_signal(self, trigger_signal: bool) -> Input:
+        return self.ExtiInput(self, trigger_signal)
+    
+    class WaitForStateCondition(Condition):
+        def __init__(self, Exti, cond):
+            self._Exti = Exti
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._Exti.get_is_on()):
+                pass
+            return True
+
+    def wait_for_state(self, cond: function) -> Condition:
+        return EXTI.WaitForStateCondition(self, cond)

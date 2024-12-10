@@ -1,7 +1,7 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
 import src.pin.memory as memory
-
+from src.test_lib.condition import Condition
 class PWM:
     def __init__(self, pin: Pinout):
         self._pin= SharedMemory.get_pin(pin, memory.PinType.PWM)
@@ -39,8 +39,44 @@ class PWM:
             while not self._cond(self._pwm.get_duty_cycle()):
                 pass
             return True
-
-    def wait_for_duty(self, cond: function) -> Condition:
-        return PWM.WaitForDutyCondition(self, cond)
-
     
+    def wait_for_duty(self, cond: function) -> Condition:
+        return self.WaitForDutyCondition(self, cond)
+    class WaitForFrequencyCondition(Condition):
+        def __init__(self, pwm, cond):
+            self._pwm = pwm
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._pwm.get_frequency()):
+                pass
+            return True
+
+    def wait_for_frequency(self, cond: function) -> Condition:
+        return self.WaitForFrequencyCondition(self, cond)
+    
+    class WaitForStateCondition(Condition):
+        def __init__(self, pwm, cond):
+            self._pwm = pwm
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._pwm.get_is_on()):
+                pass
+            return True
+    
+    def wait_for_state(self, cond: function) -> Condition:
+        return self.WaitForStateCondition(self, cond)
+
+    class WaitForDeadTimeCondition(Condition):
+        def __init__(self, pwm, cond):
+            self._pwm = pwm
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._pwm.get_dead_time_ns()):
+                pass
+            return True
+    
+    def wait_for_dead_time(self, cond: function) -> Condition:
+        return self.WaitForDeadTimeCondition(self, cond)

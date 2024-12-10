@@ -1,8 +1,8 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
 import src.pin.memory as memory
-
-
+from src.test_lib.input import Input
+from src.test_lib.condition import Condition
 
 
 class ADC:
@@ -31,3 +31,15 @@ class ADC:
     def generate_value(self, value: int) -> Input:
         return self.ValueInput(self, value)
     
+    class WaitForStateCondition(Condition):
+        def __init__(self, ADC, cond):
+            self._ADC = ADC
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._ADC.get_is_on()):
+                pass
+            return True
+
+    def wait_for_state(self, cond: function) -> Condition:
+        return self.WaitForStateCondition(self, cond)

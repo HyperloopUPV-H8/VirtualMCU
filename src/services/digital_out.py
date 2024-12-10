@@ -1,6 +1,7 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
 import src.pin.memory as memory
+from src.test_lib.condition import Condition
 class DigitalOutService:
     def __init__(self, pin: Pinout):
         self._pin = SharedMemory.get_pin(pin, memory.PinType.DigitalOut)
@@ -8,4 +9,15 @@ class DigitalOutService:
     def get_pin_state(self) -> memory.DigitalOut.State:
         return self._pin.data.state
 
-    
+    class WaitForStateCondition(Condition):
+        def __init__(self, digitalOut, cond):
+            self._digitalOut = digitalOut
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._digitalOut.get_pin_state()):
+                pass
+            return True
+
+    def wait_for_state(self, cond: function) -> Condition:
+        return DigitalOutService.WaitForStateCondition(self, cond)

@@ -1,6 +1,8 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
 import src.pin.memory as memory
+from src.test_lib.input import Input
+from src.test_lib.condition import Condition
 from ctypes import c_uint32
 from enum import Enum, auto, unique
 registered_encoder = []
@@ -25,4 +27,38 @@ class Encoder:
     
     def increase_counter(self) -> None:
         self.set_counter(self._pin1.data.counter +1)
+    
+    class DirectionInput(Input):
+        def __init__(self,Encoder, direction):
+            self._Encoder = Encoder
+            self._direction = direction
+
+        def apply(self):
+            self._Encoder.set_direction(self._direction)
+
+    def generate_direction(self, direction: memory.Encoder.Direction) -> Input:
+        return self.DirectionInput(self, direction)
+    
+    class CounterInput(Input):
+        def __init__(self, Encoder, counter):
+            self._Encoder = Encoder
+            self._counter = counter
+
+        def apply(self):
+            self._Encoder.set_counter(self._counter)
+
+    def generate_counter(self, counter: int) -> Input:
+        return self.CounterInput(self, counter)
+    
+    class WaitForStateCondition(Condition):
+        def __init__(self, Encoder, cond):
+            self._Encoder = Encoder
+            self._cond = cond
         
+        async def check(self) -> bool:
+            while not self._cond(self._Encoder.get_is_on()):
+                pass
+            return True
+
+    def wait_for_state(self, cond: function) -> Condition:
+        return self.WaitForStateCondition(self, cond)
