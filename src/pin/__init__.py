@@ -1,8 +1,7 @@
 from enum import Enum, auto, unique
 
-
-from .pinout import Pinout
-from .memory import (
+from src.pin.pinout import Pinout
+from src.pin.memory import (
     DigitalOut,
     DigitalIn,
     ADC,
@@ -16,28 +15,42 @@ from .memory import (
 
 @unique
 class PinType(Enum):
-    NotUsed = auto()
-    DigitalOut = auto()
-    DigitalIn = auto()
-    ADC = auto()
-    EXTI = auto()
-    Encoder = auto()
-    InputCapture = auto()
-    PWM = auto()
-    DualPWM = auto()
-    FDCAN = auto()
-    # TODO: add missing types
+    NotUsed = 0
+    DigitalOut = 1
+    DigitalIn = 2
+    PWM = 3
+    DualPWM = 4
+    ADC = 5
+    FDCAN = 6
+    SPI= 7
+    InputCapture = 8
+    Encoder = 9
+    EXTI = 10
+    Ethernet= 11
 
 class DualPWM: ...
 
 class Pin:
+    _pin_type_to_representation = {
+        PinType.DigitalOut: DigitalOut,
+        PinType.DigitalIn: DigitalIn,
+        PinType.PWM: PWM,
+        PinType.DualPWM: DualPWM,
+        PinType.ADC: ADC,
+        PinType.InputCapture: InputCapture,
+        PinType.Encoder: Encoder,
+        PinType.EXTI: EXTI
+    }
+
     _pin_type_offset_in_memory = 0
 
     _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM
 
-    def __init__(self, pin: Pinout, shm: memoryview, pin_type: PinType = None):
+    def __init__(self, pin: Pinout, shm: memoryview, pin_type: PinType):
         self._pin = pin
         self._mem = Pin._get_memory_view(pin, shm)
+
+        print("PinType", pin_type)
 
         if (pin_type != None):
             self._check_type_is_same_as(pin_type)
@@ -55,39 +68,22 @@ class Pin:
 
     # returns a memoryview of the exact bytes that represent this pin
     def _get_memory_view(pin: Pinout, shm: memoryview) -> memoryview:
-        from src.shared_memory import SharedMemory
+        from shared_memory import SharedMemory
         base_address = pin.value * SharedMemory.pin_size_in_memory
         return shm[base_address:base_address + SharedMemory.pin_size_in_memory]
 
     # throws an exception if the pin type is different
     def _check_type_is_same_as(self, pin_type: PinType):
-        stored_pin_type = self._mem[Pin._pin_type_offset_in_memory]
-        if PinType(stored_pin_type) == pin_type:
+        stored_pin_type = PinType(self._mem[Pin._pin_type_offset_in_memory])
+        if stored_pin_type == pin_type:
             return
         raise DifferentPinType(pin_type, stored_pin_type)
 
     # construct the class to access the actual pin data and store it
     def _init_data(self):
-        if self.type == PinType.DigitalOut:
-            self._data = DigitalOut(self._mem[1:])
-        elif self.type == PinType.DigitalIn:
-            self._data = DigitalIn(self._mem[1:])
-        elif self.type == PinType.ADC:
-            self._data = ADC(self._mem[1:])
-        elif self.type == PinType.EXTI:
-            self._data = EXTI(self._mem[1:])
-        elif self.type == PinType.Encoder:
-            self._data = Encoder(self._mem[1:])
-        elif self.type == PinType.InputCapture:
-            self._data = InputCapture(self._mem[1:])
-        elif self.type == PinType.PWM:
-            self._data = PWM(self._mem[1:])
-        elif self.type == PinType.DualPWM:
-            self._data = DualPWM(self._mem[1:])
-        elif self.type == PinType.FDCAN:
-            self._data = FDCAN(self._mem[1:])
-            
-        # TODO: add missing types
+        if self.type in self._pin_type_to_representation:
+            pin_class = self._pin_type_to_representation[self.type]
+            self._data = pin_class(self._mem[1:])
         else:
             self._data = None
 
