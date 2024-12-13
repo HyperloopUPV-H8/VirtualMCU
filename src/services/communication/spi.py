@@ -15,7 +15,7 @@ class SPIPeripheral(abc.ABC):
     - SLAVE_DESELECT: this command is sended under the number '2'
     - NORMAL_PACKET: this command is sended under the number '0',
         followed by the message intented to send.
-    To the other side, if you are a slave, you must check the command before process the data.
+    To the other side, if you are a slave, you must check the command before processing the data.
     Communication itself has been implemented using UDP protocol.
     Messages are handled using queues and threads, one for transmission and other for reception.
     '''
