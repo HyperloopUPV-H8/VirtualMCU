@@ -76,9 +76,9 @@ class SPIMaster(SPIPeripheral):
             port_slave: port of the slave you want to select and send the data
         '''
         if (self.send_address != (ip_slave, port_slave)):
-            self.transmission_queue.put(b'2') # Sending SLAVE_SELECT command
+            self.transmission_queue.put(b'2') # Sending SLAVE_DESELECT command
             self.send_address = (ip_slave, port_slave)
-            self.transmission_queue.put(b'1') # Sending SLAVE_DESELECT command
+            self.transmission_queue.put(b'1') # Sending SLAVE_SELECT command
         self.transmission_queue.put(b'0' + msg)
 
 class SPISlave(SPIPeripheral): 
