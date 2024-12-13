@@ -146,4 +146,8 @@ class DualPWM(PinMemoryView):
 
     @property
     def dead_time_ns(self) -> int:
-        return struct.unpack("=q", self._mem[9:17])[0]
+        return struct.unpack("=l", self._mem[9:13])[0]
+
+class FDCAN(PinMemoryView):
+    None
+
