@@ -56,3 +56,17 @@ class EXTI:
 
     def wait_for_priority(self, cond: function) -> Condition:
         return self.WaitForPriorityCondition(self, cond)
+    
+    class WaitForTriggerModeCondition(Condition):
+        def __init__(self, Exti, cond):
+            self._Exti = Exti
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._Exti.get_trigger_mode()):
+                await asyncio.sleep(0)
+                pass
+            return True
+
+    def wait_for_Trigger_Mode(self, cond: function) -> Condition:
+        return self.WaitForTriggerModeCondition(self, cond)
