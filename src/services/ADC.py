@@ -3,7 +3,7 @@ from src.pin.pinout import Pinout
 import src.pin.memory as memory
 from src.test_lib.input import Input
 from src.test_lib.condition import Condition
-
+import asyncio
 
 class ADC:
     ADC_MAX_VOLTAGE = 3.3
@@ -32,12 +32,13 @@ class ADC:
         return self.ValueInput(self, value)
     
     class WaitForStateCondition(Condition):
-        def __init__(self, ADC, cond):
-            self._ADC = ADC
+        def __init__(self, adc, cond):
+            self._adc = adc
             self._cond = cond
         
         async def check(self) -> bool:
-            while not self._cond(self._ADC.get_is_on()):
+            while not self._cond(self._adc.get_is_on()):
+                await asyncio.sleep(0)
                 pass
             return True
 

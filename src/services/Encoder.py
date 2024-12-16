@@ -5,6 +5,7 @@ from src.test_lib.input import Input
 from src.test_lib.condition import Condition
 from ctypes import c_uint32
 from enum import Enum, auto, unique
+import asyncio
 registered_encoder = []
 class Encoder:
     def __init__(self,pin1: Pinout, pin2: Pinout):
@@ -57,6 +58,7 @@ class Encoder:
         
         async def check(self) -> bool:
             while not self._cond(self._Encoder.get_is_on()):
+                await asyncio.sleep(0)
                 pass
             return True
 

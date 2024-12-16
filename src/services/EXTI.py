@@ -3,6 +3,7 @@ from src.pin.pinout import Pinout
 import src.pin.memory as memory
 from src.test_lib.input import Input
 from src.test_lib.condition import Condition
+import asyncio
 class EXTI:
     def __init__(self, pin: Pinout, trigger_mode:memory.EXTI_Trigger_Mode):
         self._pin= SharedMemory.get_pin(pin, memory.PinType.EXTI)
@@ -35,8 +36,23 @@ class EXTI:
         
         async def check(self) -> bool:
             while not self._cond(self._Exti.get_is_on()):
+                await asyncio.sleep(0)
                 pass
             return True
 
     def wait_for_state(self, cond: function) -> Condition:
-        return EXTI.WaitForStateCondition(self, cond)
+        return self.WaitForStateCondition(self, cond)
+
+    class WaitForPriorityCondition(Condition):
+        def __init__(self, Exti, cond):
+            self._Exti = Exti
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._Exti.get_priority()):
+                await asyncio.sleep(0)
+                pass
+            return True
+
+    def wait_for_priority(self, cond: function) -> Condition:
+        return self.WaitForPriorityCondition(self, cond)

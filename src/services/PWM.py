@@ -2,6 +2,7 @@ from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
 import src.pin.memory as memory
 from src.test_lib.condition import Condition
+import asyncio
 class PWM:
     def __init__(self, pin: Pinout):
         self._pin= SharedMemory.get_pin(pin, memory.PinType.PWM)
@@ -37,6 +38,7 @@ class PWM:
         
         async def check(self) -> bool:
             while not self._cond(self._pwm.get_duty_cycle()):
+                await asyncio.sleep(0)
                 pass
             return True
     
@@ -49,6 +51,7 @@ class PWM:
         
         async def check(self) -> bool:
             while not self._cond(self._pwm.get_frequency()):
+                await asyncio.sleep(0)
                 pass
             return True
 
@@ -62,6 +65,7 @@ class PWM:
         
         async def check(self) -> bool:
             while not self._cond(self._pwm.get_is_on()):
+                await asyncio.sleep(0)
                 pass
             return True
     
@@ -75,6 +79,7 @@ class PWM:
         
         async def check(self) -> bool:
             while not self._cond(self._pwm.get_dead_time_ns()):
+                await asyncio.sleep(0)
                 pass
             return True
     
