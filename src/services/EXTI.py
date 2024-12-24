@@ -43,6 +43,11 @@ class EXTI:
     def wait_for_state(self, cond: function) -> Condition:
         return self.WaitForStateCondition(self, cond)
 
+    def wait_for_high(self) -> Condition:
+        return self.WaitForStateCondition(self,lambda x: x == True)
+    
+    def wait_for_low(self) -> Condition:
+        return self.WaitForStateCondition(self,lambda x: x == False)
     class WaitForPriorityCondition(Condition):
         def __init__(self, Exti, cond):
             self._Exti = Exti
