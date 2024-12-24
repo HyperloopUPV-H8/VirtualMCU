@@ -4,7 +4,6 @@ import time
 from queue import Queue
 from typing import Optional
 MAX_SIZE_PACKET = 1024
-MAX_LISTEN_CONNECTIONS = 5
 TIMEOUT_TIME = 2.0
 class Socket: 
     def __init__(self, lip, lport, rip, rport): 
