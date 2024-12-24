@@ -10,6 +10,7 @@ from src.pin.memory import (
     InputCapture,
     PWM,
     DualPWM,
+    FDCAN,
 )
 
 @unique
@@ -26,7 +27,6 @@ class PinType(Enum):
     Encoder = 9
     EXTI = 10
     Ethernet= 11
-    # TODO: add missing types
 
 class DualPWM: ...
 
