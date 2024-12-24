@@ -69,82 +69,9 @@ class DatagramSocket:
     def __del__(self):
         self.stop()
 
-class UDP_Packets:
-    def __init__(self,*packets): 
-        #packets is a list where first goes an ID uint16_t and then string with types
-        self._dict_packets = {}
-        for packet in packets:
-            if len(packet) < 1:
-                raise ValueError ("Every packet need a ID at least")
-            if not isinstance(packet[0],int) or not (0 <= packet[0] <= 0xFFFF):
-                raise ValueError(f"The id must be an uint16_t, {packet[0]}")
-            id = packet[0]
-            self._dict_packets[id] = list()
-            for data_type in packet[1:]:
-                self._dict_packets[id].append(data_type)
 
-    def serialize_packet(self,packet_id,*values):
-        if packet_id not in self._dict_packets:
-            raise KeyError(f"Packet ID {packet_id} not found in the map")
-        
-        expected_sizes = self._dict_packets[packet_id]
-        
-        if len(values) != len(expected_sizes):
-            raise ValueError(f"Expected {len(expected_sizes)} but received {len(values)}")
-        
-        binary_packet = struct.pack('<H',packet_id)
-        for value, data_type in zip(values,expected_sizes):
-            match data_type:
-                case "uint8" | "enum": 
-                    binary_packet += struct.pack('<B',value)
-                case "int8": 
-                    binary_packet += struct.pack('<b',value)
-                case "uint16" : 
-                    binary_packet += struct.pack('<H',value)
-                case "int16": 
-                    binary_packet += struct.pack('<h',value)
-                case "uint32": 
-                    binary_packet += struct.pack('<I',value)
-                case "int32" : 
-                    binary_packet += struct.pack('<i',value)
-                case "float32" : 
-                    binary_packet += struct.pack('<f',value)
-                case "uint64": 
-                    binary_packet += struct.pack('<Q',value)
-                case "int64": 
-                    binary_packet += struct.pack('<q',value)
-                case "float64" : 
-                    binary_packet += struct.pack('<d',value)
-                case _:
-                    raise ValueError(f"Unsupported data type: {data_type}") 
-        return binary_packet
                  
                  
-udp_receive = DatagramSocket("127.0.0.1",8081,"127.0.0.1",8085)
-udp_send = DatagramSocket("127.0.0.1",8085,"127.0.0.1",8081)
-def receive():
-    while True:
-        packet = udp_receive.get_packet()
-        if packet != None:
-            print(packet)
-            print(f"New packet id: {struct.unpack('<H',packet[:2])[0]}")
-        time.sleep(1)
-
-if __name__ == "__main__":
-    mypackets = [1]
-    packets = UDP_Packets(mypackets)
-    receive__thread = threading.Thread(target=receive, daemon=True)
-    receive__thread.start()
-    try:
-        while True:
-            time.sleep(2)
-            bytes = packets.serialize_packet(1)
-            udp_send.transmit(bytes)
-    except KeyboardInterrupt as e:
-        print("finish due to keyboard")
-        udp_receive.stop()
-        udp_send.stop()
-        exit(0)
 
 
 
