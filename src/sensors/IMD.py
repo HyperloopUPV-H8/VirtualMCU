@@ -6,6 +6,7 @@ from shared_memory import SharedMemory
 from src.pin import memory
 from test_lib.input.aggregate import Multiple
 from test_lib.input.input import Input, InputFailedException
+from test_lib.condition.condition import Condition
 from test_lib.input.timed import After
 from enum import Enum
 
@@ -41,6 +42,9 @@ class IMD:
                 self.m_hs.generate_duty(duty_cycle),
                 self.m_hs.generate_frequency(frequency),
             )
+
+    def check_is_on(self) -> Condition:
+        return self.power_on.wait_for_high()
 
     def generate_fast_start(self, duty_cycle) -> Input:
         if 5 <= duty_cycle <= 10:
