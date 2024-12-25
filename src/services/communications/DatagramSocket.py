@@ -1,7 +1,5 @@
 import socket
 import threading
-import time
-import struct
 from queue import Queue
 from typing import Optional
 

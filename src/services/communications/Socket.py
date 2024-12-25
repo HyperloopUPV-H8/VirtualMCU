@@ -1,6 +1,5 @@
 import socket
 import threading
-import time
 from queue import Queue
 from typing import Optional
 MAX_SIZE_PACKET = 1024
