@@ -1,49 +1,23 @@
 from src.services.ADC import ADC
-from src.test_lib.input import Input
-from src.test_lib.condition import Condition
-import asyncio
+from src.pin.pinout import Pinout
+from src.shared_memory import SharedMemory
+from test_lib.input.aggregate import Multiple
+from test_lib.input.input import Input, InputFailedException
+from test_lib.condition.condition import Condition
 
 class LinearSensor():
-    def __init__(self,adc:ADC,slope:float, offset:float):
-        self._adc=adc
-        self.slope=slope
-        self.offset=offset
-        self.value=0.0
+    def __init__(self,shm:SharedMemory,pin:Pinout,slope:float, offset:float):
+        self._adc=ADC(shm,pin)
+        self._slope=slope
+        self._offset=offset
+        self._value=0.0
     
-    def write(self,value:float):
-        self.value=value
-        adc_value=(self.value-self.offset)/self.slope
-        input_action=self._adc.generate_value(adc_value)
-        input_action.apply()
-
-    def generate_case(self, initial_value: float, final_value: float, delay: float):
-        async def case():
-            self.write(initial_value)
-            await asyncio.sleep(delay)
-            self.write(final_value)
-        
-        return case
-
-    async def is_value_above_threshold(self, threshold: float, timeout: float):
-        def condition_func():
-            return self.value>threshold
-
-        condition=self._adc.wait_for_state(condition_func)
-
-        try:
-            return await asyncio.wait_for(condition.check(), timeout=timeout)
-        except asyncio.TimeoutError:
-            print("Condition not met within the estimated time")
-            return False
-        
-    async def is_value_under_threshold(self, threshold: float, timeout: float):
-        def condition_func():
-            return self.value<threshold
-
-        condition=self._adc.wait_for_state(condition_func)
-
-        try:
-            return await asyncio.wait_for(condition.check(), timeout=timeout)
-        except asyncio.TimeoutError:
-            print("Condition not met within the estimated time")
-            return False
+    def write(self,value:float) -> Input:
+        if(self._adc.get_is_on()):
+            self._value=value
+            adc_value=(self._value-self._offset)/self._slope
+            input_action=self._adc.generate_value(adc_value)
+            input_action.apply()
+            return self._adc.generate_value(adc_value)
+        else:
+            raise InputFailedException()
