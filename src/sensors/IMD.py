@@ -19,6 +19,11 @@ class Case(Enum):
     GroundFault = 50
 
 
+class IMDException(InputFailedException):
+    def __str__(self):
+        return "IMD is turned off"
+
+
 class IMD:
     def __init__(
         self, shm: SharedMemory, ok_hs: Pinout, m_hs: Pinout, power_on: Pinout
@@ -29,19 +34,16 @@ class IMD:
 
     def _IMDInput(self, frequency, duty_cycle, good_state: bool) -> Input:
         if self.power_on.get_pin_state() == memory.DigitalOut.State.Low:
-            raise InputFailedException
-        elif good_state is True:
-            return Multiple(
-                self.ok_hs.generate_state(memory.DigitalIn.State.High),
-                self.m_hs.generate_duty(duty_cycle),
-                self.m_hs.generate_frequency(frequency),
-            )
-        else:
-            return Multiple(
-                self.ok_hs.generate_state(memory.DigitalIn.State.Low),
-                self.m_hs.generate_duty(duty_cycle),
-                self.m_hs.generate_frequency(frequency),
-            )
+            raise IMDException
+        return Multiple(
+            self.ok_hs.generate_state(
+                memory.DigitalIn.State.High
+                if good_state
+                else memory.DigitalIn.State.Low
+            ),
+            self.m_hs.generate_duty(duty_cycle),
+            self.m_hs.generate_frequency(frequency),
+        )
 
     def check_is_on(self) -> Condition:
         return self.power_on.wait_for_high()
