@@ -12,6 +12,10 @@ class LinearSensor():
         self._offset=offset
         self._value=0.0
     
+    class LinearSensorException(InputFailedException):
+        def __str__(self):
+            return "The ADC is not on"
+
     def write(self,value:float) -> Input:
         if(self._adc.get_is_on()):
             self._value=value
@@ -20,4 +24,4 @@ class LinearSensor():
             input_action.apply()
             return self._adc.generate_value(adc_value)
         else:
-            raise InputFailedException()
+            raise self.LinearSensorException()
