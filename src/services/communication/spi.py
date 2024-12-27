@@ -1,11 +1,11 @@
 import socket, queue
 from threading import Thread
-import abc
+from abc import ABC, abstractmethod
 from pin.pinout import Pinout
 from shared_memory import SharedMemory
 
 
-class SPIPeripheral(abc.ABC):
+class SPIPeripheral(ABC):
     '''
     This is an abstract class that represent an SPI peripheral.
     The protocol simulation has been implemented using a very simple command protocol:
@@ -19,10 +19,10 @@ class SPIPeripheral(abc.ABC):
     Communication itself has been implemented using UDP protocol.
     Messages are handled using queues and threads, one for transmission and other for reception.
     '''
-    @abc.abstractmethod
+    @abstractmethod
     def _send(self): pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def _recv(self): pass
 
     def __init__(self, ip, port): 
@@ -40,14 +40,14 @@ class SPIPeripheral(abc.ABC):
     def receive(self) -> bytes: 
         return self.reception_queue.get
     
-    @abc.abstractmethod
+    @abstractmethod
     def transmit(self): pass
 
     def __del__(self):
-        self.socket.close()
         self.stop = True
         self.transmission_thread.join()
         self.reception_thread.join()
+        self.socket.close()
         
 
 class SPIMaster(SPIPeripheral): 
