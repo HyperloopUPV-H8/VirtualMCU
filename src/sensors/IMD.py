@@ -41,8 +41,6 @@ class IMD:
     def _check_pin_state(self) -> bool:
         if self.power_on.get_pin_state() == memory.DigitalOut.State.Low:
             raise IMDException
-        else:
-            return True
 
     def _IMDInput(self, frequency, duty_cycle, good_state: bool) -> Input:
         return Checked(
