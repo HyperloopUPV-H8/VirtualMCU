@@ -10,6 +10,11 @@ from test_lib.condition.condition import Condition
 from test_lib.input.timed import After
 from enum import Enum
 
+"""
+    Factory resistance used to determine the state of the SST (Speed Start Measuring)
+"""
+RAN = 100000  # 100 KOhmios
+
 
 class Case(Enum):
     ShortCircuit = 0
@@ -48,97 +53,76 @@ class IMD:
     def check_is_on(self) -> Condition:
         return self.power_on.wait_for_high()
 
-    def generate_fast_start(self, duty_cycle) -> Input:
-        if 5 <= duty_cycle <= 10:
-            return self._IMDInput(30, duty_cycle, True)
-        if 90 <= duty_cycle <= 95:
-            return self._IMDInput(30, duty_cycle, False)
-        else:
-            raise ValueError(
-                "Duty cycle for fast start can be only between 5%% and 10%%, or between 90%% and 95%%"
-            )
-
-    def generate_short_circuit(self) -> Input:
-        return self._IMDInput(0, 0, 0)
-
-    def generate_normal(self, duty_cycle) -> Input:
-        if 5 <= duty_cycle <= 95:
-            raise ValueError("Duty cycle for normal state must be between 5%% and 95%%")
-        return self._IMDInput(10, duty_cycle, True)
-
-    def generate_undervoltage(self, duty_cycle) -> Input:
-        if not 5 <= duty_cycle <= 95:
-            raise ValueError(
-                "Duty cycle for undervoltage state must be between 5%% and 95%%"
-            )
-        return self._IMDInput(20, duty_cycle, False)
-
-    def generate_equipment_fault(self, duty_cycle) -> Input:
-        if not 47.5 <= duty_cycle <= 52.5:
-            raise ValueError(
-                "Duty cycle for equipment fault must be between 47.5%% and 52.5%%"
-            )
-        return self._IMDInput(40, duty_cycle, False)
-
-    def generate_ground_fault(self, duty_cycle) -> Input:
-        if not 47.5 <= duty_cycle <= 52.5:
-            raise ValueError(
-                "Duty cycle for ground fault must be between 47.5%% and 52.5%%"
-            )
-        return self._IMDInput(50, duty_cycle, False)
-
-    def generate_power_up(self, case: Case, initial_duty_cycle, duty_cycle) -> Input:
-        """
-        Args:
-            case: this must be one of five possible cases defined as an enum in Case class
-
-            initial_duty_cycle: duty cycle during the 2 initial seconds
-            It must be inside one of this two ranges:
-            - 5% - 10%. It indicates that the fast init is going well
-            - 90% - 95%. It indicates that the fast init is going bad
-            If the value is outside this two ranges, this function will raise a value exception.
-
-            duty_cycle: depend on the case, it should have inside one range or another:
-            - Cases Normal and UnderVoltage: between 5% and 95%. This duty cycle
-            indicates the resistance. You can use the resistance to compute this
-            duty cycle using resistance_to_duty_cycle function
-            - Fault cases (Equipment or Ground): beetween 47.5% and 52.5%
-            If the value is outside any of this ranges, this function will raise a value exception.
-        """
-        if case is Case.ShortCircuit:
-            return Multiple(
-                self.generate_fast_start(initial_duty_cycle),
-                After(2, self.generate_short_circuit(duty_cycle)),
-            )
-
-        if case is Case.Normal:
-            return Multiple(
-                self.generate_fast_start(initial_duty_cycle),
-                After(2, self.generate_normal(duty_cycle)),
-            )
-
-        if case is Case.UnderVoltage:
-            return Multiple(
-                self.generate_fast_start(initial_duty_cycle),
-                After(2, self.generate_undervoltage(duty_cycle)),
-            )
-
-        if case is Case.EquipmentFault:
-            return Multiple(
-                self.generate_fast_start(initial_duty_cycle),
-                After(2, self.generate_equipment_fault(duty_cycle)),
-            )
-
-        if case is Case.GroundFault:
-            return Multiple(
-                self.generate_fast_start(initial_duty_cycle),
-                After(2, self.generate_ground_fault(duty_cycle)),
-            )
-
-    def resistance_to_duty_cycle(self, resistance) -> float:
+    def _resistance_to_duty_cycle(self, resistance) -> float:
         """
         Auxiliar method used to transform the resistance you deserve to the duty cycle that
         you need to pass to generate_normal() and generate_undervoltage() functions
         """
         DIVISOR_RESISTANCE = 1200000
         return ((0.9 * DIVISOR_RESISTANCE) / (resistance + DIVISOR_RESISTANCE)) + 0.05
+
+    def generate_fast_start(self, good_state: bool) -> Input:
+        if good_state:
+            return self._IMDInput(30, 7.5, True)
+        else:
+            return self._IMDInput(30, 92.5, False)
+
+    def generate_short_circuit(self) -> Input:
+        return self._IMDInput(0, 0, 0)
+
+    def generate_normal(self, resistance) -> Input:
+        duty_cycle = self._resistance_to_duty_cycle(resistance)
+        if not 5 <= duty_cycle <= 95:
+            raise ValueError("Duty cycle must be between 5%% and 95%%")
+        return self._IMDInput(10, duty_cycle, True)
+
+    def generate_undervoltage(self, resistance) -> Input:
+        duty_cycle = self._resistance_to_duty_cycle(resistance)
+        if not 5 <= duty_cycle <= 95:
+            raise ValueError("Duty cycle must be between 5%% and 95%%")
+        return self._IMDInput(20, duty_cycle, False)
+
+    def generate_equipment_fault(self) -> Input:
+        return self._IMDInput(40, 50, False)
+
+    def generate_ground_fault(self) -> Input:
+        return self._IMDInput(50, 50, False)
+
+    def generate_power_up(self, case: Case, resistance) -> Input:
+        """
+        Args:
+            case: this must be one of five possible cases defined as an enum in Case class
+
+            resistance: used to determine the PWM duty cycle.
+            It only has sense if case is Normal or UnderVoltage
+        """
+
+        if case is Case.ShortCircuit:
+            return Multiple(
+                self.generate_fast_start(True if resistance > 2 * RAN else False),
+                After(2, self.generate_short_circuit()),
+            )
+
+        if case is Case.Normal:
+            return Multiple(
+                self.generate_fast_start(True if resistance > 2 * RAN else False),
+                After(2, self.generate_normal(resistance)),
+            )
+
+        if case is Case.UnderVoltage:
+            return Multiple(
+                self.generate_fast_start(True if resistance > 2 * RAN else False),
+                After(2, self.generate_undervoltage(resistance)),
+            )
+
+        if case is Case.EquipmentFault:
+            return Multiple(
+                self.generate_fast_start(True if resistance > 2 * RAN else False),
+                After(2, self.generate_equipment_fault()),
+            )
+
+        if case is Case.GroundFault:
+            return Multiple(
+                self.generate_fast_start(True if resistance > 2 * RAN else False),
+                After(2, self.generate_ground_fault()),
+            )
