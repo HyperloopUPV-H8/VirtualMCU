@@ -5,6 +5,7 @@ from services.digital_out import DigitalOutService
 from shared_memory import SharedMemory
 from src.pin import memory
 from test_lib.input.aggregate import Multiple
+from test_lib.input.checked import Checked
 from test_lib.input.input import Input, InputFailedException
 from test_lib.condition.condition import Condition
 from test_lib.input.timed import After
@@ -37,17 +38,24 @@ class IMD:
         self.ok_hs = DigitalInService(shm, ok_hs)
         self.m_hs = InputCapture(shm, m_hs)
 
-    def _IMDInput(self, frequency, duty_cycle, good_state: bool) -> Input:
+    def _check_pin_state(self) -> bool:
         if self.power_on.get_pin_state() == memory.DigitalOut.State.Low:
             raise IMDException
-        return Multiple(
-            self.ok_hs.generate_state(
-                memory.DigitalIn.State.High
-                if good_state
-                else memory.DigitalIn.State.Low
+        else:
+            return True
+
+    def _IMDInput(self, frequency, duty_cycle, good_state: bool) -> Input:
+        return Checked(
+            self._check_pin_state,
+            Multiple(
+                self.ok_hs.generate_state(
+                    memory.DigitalIn.State.High
+                    if good_state
+                    else memory.DigitalIn.State.Low
+                ),
+                self.m_hs.generate_duty(duty_cycle),
+                self.m_hs.generate_frequency(frequency),
             ),
-            self.m_hs.generate_duty(duty_cycle),
-            self.m_hs.generate_frequency(frequency),
         )
 
     def check_is_on(self) -> Condition:
