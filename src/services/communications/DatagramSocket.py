@@ -18,25 +18,7 @@ class DatagramSocket:
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         self._sock.bind((self.local_ip,self.local_port))
         self._sock.settimeout(TIMEOUT_TIME) 
-        self._running = True
-        self._recv_thread = threading.Thread(target=self._receive, daemon=True)
-        self._recv_thread.start()      
-    
-    def _receive(self): 
-        while self._running:
-            try:
-                data,address = self._sock.recvfrom(MAX_SIZE_PACKET)
-                if address == (self.remote_ip,self.remote_port): #check if the receiving message comes from the ip address correct
-                    self._queue_packet_received.put(data)
-            except socket.timeout:
-                continue
-            except OSError as e:
-                if self._running == False:
-                    return
-                print(f"Error while receiving data: {e}")
-                break
-        self._running = False
-               
+        self._running = False                  
                
     def transmit(self, buf: bytes) -> int: 
         bytes_sent = 0
@@ -50,9 +32,18 @@ class DatagramSocket:
         return bytes_sent
     
     def get_packet(self) -> Optional[bytes]:
-        if self._queue_packet_received.empty():
-            return None
-        return self._queue_packet_received.get()
+        while self._running:
+            try:
+                data,address = self._sock.recvfrom(MAX_SIZE_PACKET)
+                if address == (self.remote_ip,self.remote_port): #check if the receiving message comes from the ip address correct
+                    return data
+            except socket.timeout:
+                continue
+            except OSError as e:
+                if self._running == False:
+                    return
+                print(f"Error while receiving data: {e}")
+                break
     
     def stop(self):
         if not self._running:

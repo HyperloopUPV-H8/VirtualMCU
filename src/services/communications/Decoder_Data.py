@@ -31,6 +31,7 @@ class Decoder:
     
     def start(self):
         self.recv_packet_running = True
+        self.ds._running = True
         self.recv_packet_thread.start()
 
     def _recv_packet(self):
@@ -139,6 +140,7 @@ class Decoder:
     def stop(self):
         self.recv_packet_running = False
         self.recv_packet_thread.join()
+        self.ds.stop()
 
     def __del__(self):
         self.stop()
