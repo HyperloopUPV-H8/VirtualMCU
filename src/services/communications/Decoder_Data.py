@@ -74,43 +74,43 @@ class Decoder:
             data = None
             match type:
                 case "bool":
-                    data = struct.unpack('<B', buffer[:1])
+                    data = 'True' if struct.unpack('<B', buffer[:1])[0] else 'False'
                     buffer = buffer[1:]
                 case "uint8":
-                    data = struct.unpack('<B', buffer[:1])
+                    data = struct.unpack('<B', buffer[:1])[0]
                     buffer = buffer[1:]
                 case "int8":
-                    data = struct.unpack('<b', buffer[:1])
+                    data = struct.unpack('<b', buffer[:1])[0]
                     buffer = buffer[1:]
                 case "uint16":
-                    data = struct.unpack('<H', buffer[:2])
+                    data = struct.unpack('<H', buffer[:2])[0]
                     buffer = buffer[2:]
                 case "int16":
-                    data = struct.unpack('<h', buffer[:2])
+                    data = struct.unpack('<h', buffer[:2])[0]
                     buffer = buffer[2:]
                 case "uint32":
-                    data = struct.unpack('<I', buffer[:4])
+                    data = struct.unpack('<I', buffer[:4])[0]
                     buffer = buffer[2:]
                 case "int32":
-                    data = struct.unpack('<i', buffer[:4])
+                    data = struct.unpack('<i', buffer[:4])[0]
                     buffer = buffer[4:]
                 case "float32":
-                    data = struct.unpack('<f', buffer[:4])
+                    data = struct.unpack('<f', buffer[:4])[0]
                     buffer = buffer[4:]
                 case "uint64":
-                    data = struct.unpack('<Q', buffer[:8])
+                    data = struct.unpack('<Q', buffer[:8])[0]
                     buffer = buffer[8:]
                 case "int64":
-                    data = struct.unpack('<q', buffer[:8])
+                    data = struct.unpack('<q', buffer[:8])[0]
                     buffer = buffer[8:]
                 case "float64":
-                    data = struct.unpack('<d', buffer[:8])
+                    data = struct.unpack('<d', buffer[:8])[0]
                     buffer = buffer[8:]
                 case _:
                     if 'enum' in type:
-                        value_data = struct.unpack('<B', buffer[:1])
+                        value_data = struct.unpack('<B', buffer[:1])[0]
                         buffer = buffer[1:]
-                        valores = re.search(r'\((.*?)\)', type).split(',')
+                        valores = (re.search(r'\((.*?)\)', type)).group(1).split('-')
                         data = valores[value_data]
                         
                     else:
@@ -135,7 +135,12 @@ class Decoder:
         return size
     
     def __getitem__(self, key):
-        return self.dict_measurement_value[key]
+        
+        if key in self.dict_measurement_value:
+            return self.dict_measurement_value[key]
+        else:
+            print("The key is not include in the dictionary")
+            return None
 
     def stop(self):
         self.recv_packet_running = False
