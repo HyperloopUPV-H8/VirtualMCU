@@ -1,7 +1,7 @@
 
 from multiprocessing import shared_memory
-from pin.pinout import Pinout
-from pin import Pin, PinType
+from vmcu_package.pin.pinout import Pinout
+from vmcu_package.pin import Pin, PinType
 
 class SharedMemory:
     gpio_memory = memoryview()

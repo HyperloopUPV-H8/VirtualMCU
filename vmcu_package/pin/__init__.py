@@ -1,5 +1,5 @@
 from enum import Enum, auto, unique
-from shared_memory import SharedMemory
+from vmcu_package.shared_memory import SharedMemory
 
 from .pinout import Pinout
 from .memory import (
