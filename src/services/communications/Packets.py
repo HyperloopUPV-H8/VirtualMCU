@@ -13,7 +13,13 @@ class Packets:
             id = packet[0]
             self._dict_packets[id] = list()
             for data_type in packet[1:]:
-                self._dict_packets[id].append(data_type)
+                if data_type == "enum":
+                    enum_names = None
+                    for names in data_type:
+                      enum_names.append(data_type)
+                    self._dict_packets[id].append({data_type,enum_names})
+                else:
+                    self._dict_packets[id].append(data_type)
 
     
     def validate_packet(self,packet_id,values):
