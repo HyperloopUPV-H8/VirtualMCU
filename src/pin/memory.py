@@ -18,8 +18,8 @@ class DigitalOut(PinMemoryView):
 class DigitalIn(PinMemoryView):
     @unique
     class State(Enum):
-        High = True
-        Low = False
+        Low = 0
+        High = 1
 
     @property
     def state(self) -> State:
@@ -27,7 +27,7 @@ class DigitalIn(PinMemoryView):
 
     @state.setter
     def state(self, state: State):
-        struct.pack_into("=?", self._mem[0:1], 0, state)
+        struct.pack_into("=?", self._mem[0:1], 0, state.value)
 
 class ADC(PinMemoryView):
     @property
@@ -146,4 +146,8 @@ class DualPWM(PinMemoryView):
 
     @property
     def dead_time_ns(self) -> int:
-        return struct.unpack("=q", self._mem[9:17])[0]
+        return struct.unpack("=l", self._mem[9:13])[0]
+
+class FDCAN(PinMemoryView):
+    None
+

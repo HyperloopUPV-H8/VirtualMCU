@@ -1,10 +1,10 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
-import src.pin.memory as memory
+from src.pin import PinType,memory
 
 class DigitalInService:
-    def __init__(self, pin: Pinout):
-        self._pin = SharedMemory.get_pin(pin, memory.PinType.DigitalIn)
+    def __init__(self, shm: SharedMemory,pin: Pinout):
+        self._pin = shm.get_pin(pin, PinType.DigitalIn)
         
     def turn_on(self):
         self._pin.data.state = memory.DigitalIn.State.High

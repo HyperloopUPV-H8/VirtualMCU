@@ -21,4 +21,3 @@ class SharedMemory:
             return -1
         else:
             return self._state_machine_shm.buf[sm_id]
-            
