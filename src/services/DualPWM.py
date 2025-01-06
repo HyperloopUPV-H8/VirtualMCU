@@ -50,7 +50,7 @@ class DualPWM:
     def wait_for_frequency(self, cond: function) -> Condition:
         return self.WaitForFrequencyCondition(self, cond)
     
-    class WaitForStateCondition(Condition):
+    class WaitForEnableCondition(Condition):
         def __init__(self, dualpwm, cond):
             self._dualpwm = dualpwm
             self._cond = cond
@@ -61,14 +61,14 @@ class DualPWM:
                 pass
             return True
     
-    def wait_for_state(self, cond: function) -> Condition:
-        return self.WaitForStateCondition(self, cond)
+    def wait_for_enable_condition(self, cond: function) -> Condition:
+        return self.WaitForEnableCondition(self, cond)
     
-    def wait_for_high(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == True)
+    def wait_for_enable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == True)
     
-    def wait_for_low(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == False)
+    def wait_for_disable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == False)
 
     class WaitForDeadTimeCondition(Condition):
         def __init__(self, dualpwm, cond):
@@ -83,16 +83,3 @@ class DualPWM:
     
     def wait_for_dead_time(self, cond: function) -> Condition:
         return self.WaitForDeadTimeCondition(self, cond)
-    class WaitForDutyCondition(Condition):
-        def __init__(self, dualpwm, cond):
-            self._pwm = dualpwm
-            self._cond = cond
-        
-        async def check(self) -> bool:
-            while not self._cond(self._pwm.get_duty_cycle()):
-                await asyncio.sleep(0)
-                pass
-            return True
-    
-    def wait_for_duty(self, cond: function) -> Condition:
-        return self.WaitForDutyCondition(self, cond)

@@ -27,11 +27,13 @@ class EXTI:
             self._Exti.set_trigger_signal(self._trigger_signal)
 
     def generate_trigger_signal(self, trigger_signal: bool) -> Input:
+        if not self.get_is_on():
+            raise RuntimeError("Cannot generate a Trigger signal with the EXTI Disable")
         return self.ExtiInput(self, trigger_signal)
     
-    class WaitForStateCondition(Condition):
-        def __init__(self, Exti, cond):
-            self._Exti = Exti
+    class WaitForEnableCondition(Condition):
+        def __init__(self, EXTI, cond):
+            self._Exti = EXTI
             self._cond = cond
         
         async def check(self) -> bool:
@@ -39,15 +41,16 @@ class EXTI:
                 await asyncio.sleep(0)
                 pass
             return True
-
-    def wait_for_state(self, cond: function) -> Condition:
-        return self.WaitForStateCondition(self, cond)
-
-    def wait_for_high(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == True)
     
-    def wait_for_low(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == False)
+    def wait_for_enable_condition(self, cond: function) -> Condition:
+        return self.WaitForEnableCondition(self, cond)
+    
+    def wait_for_enable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == True)
+    
+    def wait_for_disable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == False)
+    
     class WaitForPriorityCondition(Condition):
         def __init__(self, Exti, cond):
             self._Exti = Exti

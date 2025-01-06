@@ -38,6 +38,8 @@ class Encoder:
             self._Encoder.set_direction(self._direction)
 
     def generate_direction(self, direction: memory.Encoder.Direction) -> Input:
+        if not self.get_is_on():
+            raise RuntimeError("Cannot generate a Direction with the Encoder Disable")
         return self.DirectionInput(self, direction)
     
     class CounterInput(Input):
@@ -49,9 +51,11 @@ class Encoder:
             self._Encoder.set_counter(self._counter)
 
     def generate_counter(self, counter: int) -> Input:
+        if not self.get_is_on():
+            raise RuntimeError("Cannot generate a Counter with the Encoder Disable")
         return self.CounterInput(self, counter)
     
-    class WaitForStateCondition(Condition):
+    class WaitForEnableCondition(Condition):
         def __init__(self, Encoder, cond):
             self._Encoder = Encoder
             self._cond = cond
@@ -61,12 +65,12 @@ class Encoder:
                 await asyncio.sleep(0)
                 pass
             return True
-
-    def wait_for_state(self, cond: function) -> Condition:
-        return self.WaitForStateCondition(self, cond)
-
-    def wait_for_high(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == True)
     
-    def wait_for_low(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == False)
+    def wait_for_enable_condition(self, cond: function) -> Condition:
+        return self.WaitForEnableCondition(self, cond)
+    
+    def wait_for_enable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == True)
+    
+    def wait_for_disable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == False)

@@ -57,8 +57,8 @@ class PWM:
 
     def wait_for_frequency(self, cond: function) -> Condition:
         return self.WaitForFrequencyCondition(self, cond)
-    
-    class WaitForStateCondition(Condition):
+
+    class WaitForEnableCondition(Condition):
         def __init__(self, pwm, cond):
             self._pwm = pwm
             self._cond = cond
@@ -69,14 +69,14 @@ class PWM:
                 pass
             return True
     
-    def wait_for_state(self, cond: function) -> Condition:
-        return self.WaitForStateCondition(self, cond)
-
-    def wait_for_high(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == True)
+    def wait_for_enable_condition(self, cond: function) -> Condition:
+        return self.WaitForEnableCondition(self, cond)
     
-    def wait_for_low(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == False)
+    def wait_for_enable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == True)
+    
+    def wait_for_disable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == False)
     class WaitForDeadTimeCondition(Condition):
         def __init__(self, pwm, cond):
             self._pwm = pwm

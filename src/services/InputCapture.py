@@ -22,7 +22,7 @@ class InputCapture:
             self._duty = duty
 
         def apply(self):
-            self.set_duty_cycle(self._duty)
+            self._InputCapture.set_duty_cycle(self._duty)
 
     def generate_duty(self, duty: int) -> Input:
         return self.DutyInput(self, duty)        

@@ -29,9 +29,11 @@ class ADC:
             self._adc.set_value(self._value)
 
     def generate_value(self, value: int) -> Input:
+        if not self.get_is_on():
+            raise RuntimeError("Cannot generate a value with the ADC Disable")
         return self.ValueInput(self, value)
     
-    class WaitForStateCondition(Condition):
+    class WaitForEnableCondition(Condition):
         def __init__(self, adc, cond):
             self._adc = adc
             self._cond = cond
@@ -42,12 +44,12 @@ class ADC:
                 pass
             return True
 
-    def wait_for_state(self, cond: function) -> Condition:
-        return self.WaitForStateCondition(self, cond)
+    def wait_for_enable_condition(self, cond: function) -> Condition:
+        return self.WaitForEnableCondition(self, cond)
     
-    def wait_for_high(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == True)
+    def wait_for_enable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == True)
     
-    def wait_for_low(self) -> Condition:
-        return self.WaitForStateCondition(self,lambda x: x == False)
+    def wait_for_disable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == False)
     
