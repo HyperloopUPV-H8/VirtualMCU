@@ -2,6 +2,8 @@ from src.shared_memory import SharedMemory
 from src.pin import Pinout,PinType,FDCAN
 from enum import Enum
 import socket
+from src.test_lib.condition import Condition
+from src.test_lib.input import Input
 
 class FDCAN:
     class DLC(Enum):
@@ -77,7 +79,22 @@ class FDCAN:
         if sent <=0:
             return False
         return True
+    
+    class PacketInput(Input): 
+        def __init__(self,FDCAN:FDCAN,message_id:int,data:list[bytes],data_length:"FDCAN.DLC"):
+            self._fdcan = FDCAN
+            self.message_id = message_id
+            self.data = data
+            self.data_length = data_length
         
+        def apply(self):
+            if (self._fdcan.transmit(self.message_id,self.data,self.data_length)):
+                return True
+            return Exception("TODO")
+    
+    def GeneratePacket(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->Input:
+        return FDCAN.PacketInput(self,message_id,data,data_length) #No se si es fdcan. o self.
+    
     def read(self )-> "Packet":
         aux_data = b""
         bytes_recv = 0
@@ -97,7 +114,15 @@ class FDCAN:
         pack=Packet(aux_identifier, aux_dlc)
         pack.rx_data = aux_data[8:]
         return pack
-            
+    
+    class ReadCondition(Condition):
+        def __init__(self,FDCAN:FDCAN):
+            self._fdcan = FDCAN
+        async def check(self):
+            return self._fdcan.read() #No se como hacer lo de devolver el valor y tal, no se me ocurre que hacer
+    
+    def wait_for_packet(self)->Condition:
+        return FDCAN.ReadCondition(self)
             
 class Packet:
         def __init__(self):
