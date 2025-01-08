@@ -1,6 +1,6 @@
-from src.services.communication.FDCAN import FDCAN
-from src.shared_memory import SharedMemory
-from src.pin.pinout import Pinout 
+from vmcu.services.communication.FDCAN import FDCAN
+from vmcu.shared_memory import SharedMemory
+from vmcu.pin.pinout import Pinout 
 import time
 
 
