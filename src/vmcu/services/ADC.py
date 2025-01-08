@@ -1,6 +1,6 @@
-from src.shared_memory import SharedMemory
-from src.pin.pinout import Pinout
-from src.pin import PinType,memory
+from vmcu.shared_memory import SharedMemory
+from vmcu.pin.pinout import Pinout
+from vmcu.pin import PinType,memory
 
 
 

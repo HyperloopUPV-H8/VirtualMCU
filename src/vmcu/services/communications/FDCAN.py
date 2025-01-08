@@ -1,5 +1,5 @@
-from src.shared_memory import SharedMemory
-from src.pin import Pinout,PinType,FDCAN
+from vmcu.shared_memory import SharedMemory
+from vmcu.pin import Pinout,PinType,FDCAN
 from enum import Enum
 import socket
 
