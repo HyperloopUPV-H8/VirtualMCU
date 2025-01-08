@@ -1,4 +1,4 @@
-from vmcu.services.communication.FDCAN import FDCAN
+from vmcu.services.communications.FDCAN import FDCAN
 from vmcu.shared_memory import SharedMemory
 from vmcu.pin.pinout import Pinout 
 import time
