@@ -43,4 +43,4 @@ python3 -m pip install --upgrade twine //only first time
 python3 -m twine upload --repository testpypi dist/*
 
 If you want to use the Package only as User:
-pip install -i https://test.pypi.org/simple/ vmcu
+pip install --upgrade -i https://test.pypi.org/simple/ vmcu
