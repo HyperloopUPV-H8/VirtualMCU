@@ -35,11 +35,11 @@ class Encoder:
             self._direction = direction
 
         def apply(self):
+            if not self._Encoder.get_is_on():
+                raise RuntimeError("Cannot generate a Direction with the Encoder Disable")
             self._Encoder.set_direction(self._direction)
 
     def generate_direction(self, direction: memory.Encoder.Direction) -> Input:
-        if not self.get_is_on():
-            raise RuntimeError("Cannot generate a Direction with the Encoder Disable")
         return self.DirectionInput(self, direction)
     
     class CounterInput(Input):
@@ -48,11 +48,11 @@ class Encoder:
             self._counter = counter
 
         def apply(self):
+            if not self._Encoder.get_is_on():
+                raise RuntimeError("Cannot generate a Counter with the Encoder Disable")
             self._Encoder.set_counter(self._counter)
 
     def generate_counter(self, counter: int) -> Input:
-        if not self.get_is_on():
-            raise RuntimeError("Cannot generate a Counter with the Encoder Disable")
         return self.CounterInput(self, counter)
     
     class WaitForEnableCondition(Condition):

@@ -26,11 +26,11 @@ class ADC:
             self._value = value
 
         def apply(self):
+            if not self._adc.get_is_on():
+                raise RuntimeError("Cannot generate a value with the ADC Disable")
             self._adc.set_value(self._value)
 
     def generate_value(self, value: int) -> Input:
-        if not self.get_is_on():
-            raise RuntimeError("Cannot generate a value with the ADC Disable")
         return self.ValueInput(self, value)
     
     class WaitForEnableCondition(Condition):

@@ -24,11 +24,11 @@ class EXTI:
             self._trigger_signal = trigger_signal
 
         def apply(self):
+            if not self._Exti.get_is_on():
+                raise RuntimeError("Cannot generate a Trigger signal with the EXTI Disable")
             self._Exti.set_trigger_signal(self._trigger_signal)
 
     def generate_trigger_signal(self, trigger_signal: bool) -> Input:
-        if not self.get_is_on():
-            raise RuntimeError("Cannot generate a Trigger signal with the EXTI Disable")
         return self.ExtiInput(self, trigger_signal)
     
     class WaitForEnableCondition(Condition):
