@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from pin.pinout import Pinout
 from shared_memory import SharedMemory
 from test_lib.input.input import Input
-from test_lib.condition.condition import Condition
+from test_lib.condition.condition import Condition, ConditionFailedException
 
 
 class SPIPeripheral(ABC):
@@ -63,17 +63,30 @@ class SPIPeripheral(ABC):
         self.reception_thread.join()
         self.socket.close()
 
-    def send(self, data: bytes) -> Input:
+    def sendInput(self, data: bytes) -> Input:
         return SPIInput(self, data)
+
+    def receiveCondition(self, data: bytes) -> Condition:
+        return SPICondition(self, data)
 
 
 class SPIInput(Input):
     def __init__(self, spi: SPIPeripheral, data: bytes):
-        _data = data
-        _spi = spi
+        self._data = data
+        self._spi = spi
 
     def apply(self):
         self._spi.transmit(self._data)
+
+
+class SPICondition(Condition):
+    def __init__(self, spi: SPIPeripheral, data: bytes):
+        self._data = data
+        self._spi = spi
+
+    def check(self):
+        if self._spi.receive() != self._data:
+            raise ConditionFailedException()
 
 
 class SPIMaster(SPIPeripheral):
