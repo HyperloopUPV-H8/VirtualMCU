@@ -10,17 +10,18 @@ class SPIPacket:
     """
 
     def __init__(self, types: str):
-        self.types = types
+        self._types = types
+        self.data = b"0"
 
-    def parse(self, data: bytes) -> tuple:
+    def parse(self) -> tuple:
         """Transforms binary data into the distinct values based on defined types.
 
         Args:
             data: binary data received through SPI
         """
-        if struct.calcsize(self.types) != len(data):
+        if struct.calcsize(self._types) != len(self.data):
             raise Exception("data size doesn't adjust to defined types")
-        return struct.unpack(self.types, data)
+        return struct.unpack(self._types, self.data)
 
     def build(self, *data) -> bytes:
         """Transforms the values given into binary data, ready to send through SPI
@@ -28,6 +29,6 @@ class SPIPacket:
         Args:
             *data: all values you want to send, based on defined types
         """
-        if struct.calcsize(self.types) != len(data):
+        if struct.calcsize(self._types) != len(data):
             raise Exception("data size doesn't adjust to defined types")
-        return struct.pack(self.types, data)
+        self.data = struct.pack(self._types, data)
