@@ -18,8 +18,8 @@ class DigitalOut(PinMemoryView):
 class DigitalIn(PinMemoryView):
     @unique
     class State(Enum):
-        High = True
-        Low = False
+        Low = 0
+        High = 1
 
     @property
     def state(self) -> State:
@@ -27,7 +27,7 @@ class DigitalIn(PinMemoryView):
 
     @state.setter
     def state(self, state: State):
-        struct.pack_into("=?", self._mem[0:1], 0, state)
+        struct.pack_into("=?", self._mem[0:1], 0, state.value)
 
 class ADC(PinMemoryView):
     @property
@@ -72,7 +72,7 @@ class EXTI(PinMemoryView):
 class Encoder(PinMemoryView):
     @property
     def counter(self) -> int:
-        return struct.unpack("=L", self._mem[0:4])[0]
+        return struct.unpack("=B", self._mem[0:4])[0]
     
     @counter.setter
     def counter(self, counter: int):
@@ -96,8 +96,22 @@ class Encoder(PinMemoryView):
         return struct.unpack("=?", self._mem[5:6])[0]
 
 # TODO: data definition missing in C++
-class InputCapture(PinMemoryView): ...
-
+class InputCapture(PinMemoryView):
+    @property
+    def duty_cycle(self) -> int:
+        return struct.unpack("=B", self._mem[0:1])[0]
+    
+    @duty_cycle.setter
+    def duty_cycle(self, duty_cycle: int):
+        struct.pack_into("=B", self._mem[0:1], 0,duty_cycle)
+    @property
+    def frequency(self) -> int:
+        return struct.unpack("=L", self._mem[1:5])[0]
+    
+    @frequency.setter
+    def frequency(self, frequency: int):
+        struct.pack_into("=L", self._mem[1:5], 0,frequency)
+    
     
 class PWM(PinMemoryView):
     @property
@@ -138,3 +152,6 @@ class SPI(PinMemoryView):
     @property
     def is_on(self) -> bool:
         return struct.unpack("=?", self._mem[0:1])[0]
+    
+class FDCAN(PinMemoryView):
+    None
