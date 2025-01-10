@@ -5,6 +5,7 @@ from pin.pinout import Pinout
 from shared_memory import SharedMemory
 from test_lib.input.input import Input
 from test_lib.condition.condition import Condition, ConditionFailedException
+from services.communications.packets.spipacket import SPIPacket
 
 
 class SPIPeripheral(ABC):
@@ -65,9 +66,15 @@ class SPIPeripheral(ABC):
 
     def sendInput(self, data: bytes) -> Input:
         return SPIInput(self, data)
+    
+    def sendPacket(self, packet: SPIPacket) -> Input:
+        return SPIInput(self, packet.data)
 
     def receiveCondition(self, data: bytes) -> Condition:
         return SPICondition(self, data)
+    
+    def receiveCondition(self, packet: SPIPacket) -> Condition:
+        return SPICondition(self, packet.data)
 
 
 class SPIInput(Input):
