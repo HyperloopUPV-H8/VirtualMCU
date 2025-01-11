@@ -32,27 +32,21 @@ class EncoderSensor():
             return True
 
     def generate_speed(self,direction:memory.Encoder.Direction.value,speed:float,acceleration:float)->Input:
-        if not self._encoder.get_is_on():
-            raise self.EncoderSensorException()
+        delta_counter = int(speed * N_FRAMES * FRAME_SIZE_IN_SECONDS / COUNTER_DISTANCE_IN_METERS)
+        self.direction = direction
+        if direction == memory.Encoder.Direction.Backwards:
+            self.counter -= delta_counter
         else:
-            delta_counter = int(speed * N_FRAMES * FRAME_SIZE_IN_SECONDS / COUNTER_DISTANCE_IN_METERS)
-            self.direction = direction
-            if direction == memory.Encoder.Direction.Backwards:
-                self.counter -= delta_counter
-            else:
-                self.counter += delta_counter
-                
-            self.position = (self.counter - START_COUNTER) * COUNTER_DISTANCE_IN_METERS
-            self.speed = speed
-            self.acceleration = acceleration
-            return Checked(self._check_pin_state,
-                Multiple(self._encoder.generate_direction(direction),
-                self._encoder.generate_counter(self.counter)))
+            self.counter += delta_counter
+            
+        self.position = (self.counter - START_COUNTER) * COUNTER_DISTANCE_IN_METERS
+        self.speed = speed
+        self.acceleration = acceleration
+        return Checked(self._check_pin_state,
+            Multiple(self._encoder.generate_direction(direction),
+            self._encoder.generate_counter(self.counter)))
         
     def generate_counter(self,direction:memory.Encoder.Direction.value,counter:int)->Input:
-        if not self._encoder.get_is_on():
-            raise self.EncoderSensorException()
-        else:
-            self.direction = direction
-            self.counter = counter
-            return Checked (self._check_pin_state, Multiple(self._encoder.generate_direction(direction),self._encoder.generate_counter(counter)))
+        self.direction = direction
+        self.counter = counter
+        return Checked (self._check_pin_state, Multiple(self._encoder.generate_direction(direction),self._encoder.generate_counter(counter)))
