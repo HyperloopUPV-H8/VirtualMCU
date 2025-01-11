@@ -24,8 +24,5 @@ class LinearSensor():
             return True
 
     def generate_value(self, value: float) -> Input:
-        if not self._adc.get_is_on():
-            raise self.LinearSensorException()
-        else:
-            adc_value = (value - self._offset) / self._slope
-            return Checked(self._check_pin_state, self._adc.generate_value(adc_value))
+        adc_value = (value - self._offset) / self._slope
+        return Checked(self._check_pin_state, self._adc.generate_value(adc_value))
