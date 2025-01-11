@@ -1,7 +1,7 @@
 from enum import Enum, auto, unique
 
-from src.pin.pinout import Pinout
-from src.pin.memory import (
+from vmcu.pin.pinout import Pinout
+from vmcu.pin.memory import (
     DigitalOut,
     DigitalIn,
     ADC,
@@ -10,6 +10,8 @@ from src.pin.memory import (
     InputCapture,
     PWM,
     DualPWM,
+    SPI,
+    FDCAN
 )
 
 @unique
@@ -26,7 +28,6 @@ class PinType(Enum):
     Encoder = 9
     EXTI = 10
     Ethernet= 11
-    # TODO: add missing types
 
 class DualPWM: ...
 
@@ -44,7 +45,7 @@ class Pin:
 
     _pin_type_offset_in_memory = 0
 
-    _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM
+    _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM | SPI
 
     def __init__(self, pin: Pinout, shm: memoryview, pin_type: PinType):
         self._pin = pin

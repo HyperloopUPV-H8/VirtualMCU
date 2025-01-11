@@ -1,6 +1,6 @@
-from src.shared_memory import SharedMemory
-from src.pin.pinout import Pinout
-from src.pin import PinType,memory
+from vmcu.shared_memory import SharedMemory
+from vmcu.pin.pinout import Pinout
+from vmcu.pin import PinType,memory
 class DigitalOutService:
     def __init__(self,shm: SharedMemory,pin: Pinout):
         self._pin = shm.get_pin(pin,PinType.DigitalOut)

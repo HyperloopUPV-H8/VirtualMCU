@@ -1,6 +1,6 @@
-from src.shared_memory import SharedMemory
-from src.pin.pinout import Pinout
-import src.pin.memory as memory
+from vmcu.shared_memory import SharedMemory
+from vmcu.pin.pinout import Pinout
+import vmcu.pin.memory as memory
 from ctypes import c_uint32
 from enum import Enum, auto, unique
 registered_encoder = []
