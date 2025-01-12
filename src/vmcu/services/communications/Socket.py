@@ -2,6 +2,9 @@ import socket
 import threading
 from queue import Queue
 from typing import Optional
+from vmcu.test_lib.input import Input
+from vmcu.test_lib.condition import Condition
+from vmcu.services.communications.Packets import Packets
 MAX_SIZE_PACKET = 1024
 TIMEOUT_TIME = 2.0
 class Socket: 
@@ -10,7 +13,7 @@ class Socket:
         self.remote_ip = rip
         self.local_port = lport
         self.remote_port = rport
-        self._running = True
+        self._running = False
         self._queue_packet_received = Queue()
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._recv_thread = threading.Thread(target=self._receive, daemon=True)
@@ -25,7 +28,10 @@ class Socket:
             print(f"Error connecting with the server : {e}")
             self.stop()
             return False
-        self._recv_thread.start()      
+        
+        self._running = True
+        self._recv_thread.start() 
+             
         return True
     
     def _receive(self):
@@ -67,3 +73,20 @@ class Socket:
     def __del__(self):
         self.stop()
     
+    class Raw_Data_Input(Input):
+        def __init__(self,socket,raw_data):
+            self._socket = socket
+            self._raw_data = raw_data
+        
+        def apply(self):
+            if not self._socket.is_running():
+                raise RuntimeError("Cannot send a tcp message with the socket not running")
+            self._socket.transmit(self._raw_data)
+    
+    def transmit_raw_data(self,raw_data : bytes) -> Input:
+        return self.Raw_Data_Input(self,raw_data)
+    
+    def serialize_and_transmit_data(self,formatted_data : Packets,*values) -> Input:
+        raw_data = formatted_data.serialize_packet(values)
+        return self.Raw_Data_Input(self,raw_data)
+            
