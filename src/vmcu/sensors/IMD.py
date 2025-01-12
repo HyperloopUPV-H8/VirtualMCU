@@ -1,9 +1,9 @@
-from pin.pinout import Pinout
-from services.InputCapture import InputCapture
-from services.digital_in import DigitalInService
-from services.digital_out import DigitalOutService
-from shared_memory import SharedMemory
-from src.pin import memory
+from src.vmcu.pin.pinout import Pinout
+from src.vmcu.services.InputCapture import InputCapture
+from src.vmcu.services.digital_in import DigitalInService
+from src.vmcu.services.digital_out import DigitalOutService
+from src.vmcu.shared_memory import SharedMemory
+from src.vmcu.pin import memory
 from test_lib.input.aggregate import Multiple
 from test_lib.input.checked import Checked
 from test_lib.input.input import Input, InputFailedException
