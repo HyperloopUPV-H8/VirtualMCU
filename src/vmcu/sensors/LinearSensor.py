@@ -1,10 +1,10 @@
-from src.services.ADC import ADC
-from src.pin.pinout import Pinout
-from src.shared_memory import SharedMemory
+from src.vmcu.services.ADC import ADC
+from src.vmcu.pin.pinout import Pinout
+from src.vmcu.shared_memory import SharedMemory
 from test_lib.input.aggregate import Multiple
 from test_lib.input.input import Input, InputFailedException
 from test_lib.condition.condition import Condition
-from test_lib.condition.checked import Checked
+from test_lib.input.checked import Checked
 
 class LinearSensor():
     def __init__(self,shm:SharedMemory,pin:Pinout,slope:float, offset:float):
