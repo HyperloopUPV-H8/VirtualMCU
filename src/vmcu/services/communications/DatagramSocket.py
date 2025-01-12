@@ -1,5 +1,9 @@
 import socket
 import threading
+import asyncio
+from vmcu.test_lib.input import Input
+from vmcu.test_lib.condition import Condition
+from vmcu.services.communications.Packets import Packets 
 from queue import Queue
 from typing import Optional
 
@@ -67,6 +71,35 @@ class DatagramSocket:
     def __del__(self):
         self.stop()
 
+    class Raw_Data_Input(Input):
+        def __init__(self,DatagramSocket,raw_data):
+            self._DatagramSocket = DatagramSocket
+            self._raw_data = raw_data
+        
+        def apply(self):
+            self._server.transmit(self._raw_data)
+    
+    def transmit_raw_data(self,raw_data : bytes) -> Input:
+        return self.Raw_Data_Input(self,raw_data)
+    
+    def serialize_and_transmit_data(self, formatted_data : Packets, *values) -> Input:
+        raw_data = formatted_data.serialize_packet(values)
+        return self.Raw_Data_Input(self,raw_data)
+    
+    class WaitForPacketCondition(Condition):
+        def __init__(self, Datagram_socket, cond):
+            self._DatagramSocket = Datagram_socket
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._DatagramSocket.get_packet()):
+                await asyncio.sleep(0)
+                pass
+            return True
+    
+    def wait_for_packet_condition(self, cond: function) -> Condition:
+        return self.WaitForPacketCondition(self, cond)
+    
 
                  
                  

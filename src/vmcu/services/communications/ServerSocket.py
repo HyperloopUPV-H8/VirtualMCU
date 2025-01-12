@@ -1,5 +1,9 @@
 import socket
 import threading
+import asyncio
+from vmcu.test_lib.condition import Condition
+from vmcu.test_lib.input import Input
+from vmcu.services.communications.Packets import Packets
 from queue import Queue
 from typing import Optional
 MAX_SIZE_PACKET = 1024
@@ -80,6 +84,7 @@ class Server:
         if queue.empty():
             return None
         return queue.get()      
+    
     def get_connected_clients(self) -> list[tuple[str, int]]:
         return list(self.connections.keys())
         
@@ -100,3 +105,38 @@ class Server:
         return self._running
     def __del__(self):
         self.stop()
+
+    class Raw_Data_Input(Input):
+        def __init__(self,server,raw_data,client_address):
+            self._server = server
+            self._raw_data = raw_data
+            self._client_address = client_address
+        
+        def apply(self):
+            if not self._server.is_running():
+                raise RuntimeError("Cannot send a tcp message with the server not running")
+            if self._client_address not in self._server.get_connected_clients():
+                raise RuntimeError(f"The client: {self._client_address} is not connected to the server")
+            self._server.transmit(self._raw_data,self._client_address)
+    
+    def transmit_raw_data_to_client(self,raw_data : bytes,client_address : tuple[str, int]) -> Input:
+        return self.Raw_Data_Input(self,raw_data,client_address)
+    
+    def serialize_and_transmit_data_to_client(self, formatted_data : Packets, client_address : tuple[str, int], *values) -> Input:
+        raw_data = formatted_data.serialize_packet(values)
+        return self.Raw_Data_Input(self,raw_data,client_address)
+    
+    class WaitForPacketCondition(Condition):
+        def __init__(self, server, cond):
+            self._socket = server
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._server.get_packet()):
+                await asyncio.sleep(0)
+                pass
+            return True
+    
+    def wait_for_packet_condition(self, cond: function) -> Condition:
+        return self.WaitForPacketCondition(self, cond)
+    

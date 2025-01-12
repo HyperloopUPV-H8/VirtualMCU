@@ -1,5 +1,6 @@
 import socket
 import threading
+import asyncio
 from queue import Queue
 from typing import Optional
 from vmcu.test_lib.input import Input
@@ -89,4 +90,18 @@ class Socket:
     def serialize_and_transmit_data(self,formatted_data : Packets,*values) -> Input:
         raw_data = formatted_data.serialize_packet(values)
         return self.Raw_Data_Input(self,raw_data)
-            
+    
+    class WaitForPacketCondition(Condition):
+        def __init__(self, socket, cond):
+            self._socket = socket
+            self._cond = cond
+        
+        async def check(self) -> bool:
+            while not self._cond(self._socket.get_packet()):
+                await asyncio.sleep(0)
+                pass
+            return True
+    
+    def wait_for_packet_condition(self, cond: function) -> Condition:
+        return self.WaitForPacketCondition(self, cond)
+    
