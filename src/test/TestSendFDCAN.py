@@ -1,4 +1,4 @@
-from src.services.communication.FDCAN import FDCAN
+from src.services.communications.FDCAN import FDCAN
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout 
 import time
