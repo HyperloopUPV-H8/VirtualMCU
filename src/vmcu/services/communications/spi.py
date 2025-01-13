@@ -64,11 +64,11 @@ class SPIPeripheral(ABC):
         self.reception_thread.join()
         self.socket.close()
 
-    def sendInput(self, data: bytes) -> Input:
+    def generate_send_raw(self, data: bytes) -> Input:
         return SPIInput(self, data)
     
-    def sendPacket(self, packet: SPIPacket) -> Input:
-        return SPIInput(self, packet.data)
+    def generate_send_packet(self, packet: SPIPacket) -> Input:
+        return generate_send_raw(self, packet.data)
 
     def receiveCondition(self, data: bytes) -> Condition:
         return SPICondition(self, data)
