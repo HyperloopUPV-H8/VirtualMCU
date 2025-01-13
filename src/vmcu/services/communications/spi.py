@@ -70,10 +70,10 @@ class SPIPeripheral(ABC):
     def generate_send_packet(self, packet: SPIPacket) -> Input:
         return generate_send_raw(self, packet.data)
 
-    def receiveCondition(self, data: bytes) -> Condition:
+    def wait_for_raw(self, data: bytes) -> Condition:
         return SPICondition(self, data)
     
-    def receiveCondition(self, packet: SPIPacket) -> Condition:
+    def wait_for_packet(self, packet: SPIPacket) -> Condition:
         return SPICondition(self, packet.data)
 
 
