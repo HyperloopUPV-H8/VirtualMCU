@@ -84,10 +84,10 @@ class Socket:
                 raise RuntimeError("Cannot send a tcp message with the socket not running")
             self._socket.transmit(self._raw_data)
     
-    def transmit_raw_data(self,raw_data : bytes) -> Input:
+    def generate_raw(self,raw_data : bytes) -> Input:
         return self.Raw_Data_Input(self,raw_data)
     
-    def serialize_and_transmit_data(self,formatted_data : Packets,*values) -> Input:
+    def generate_packet(self,formatted_data : Packets,*values) -> Input:
         raw_data = formatted_data.serialize_packet(values)
         return self.Raw_Data_Input(self,raw_data)
     
