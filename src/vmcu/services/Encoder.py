@@ -3,6 +3,9 @@ from vmcu.pin.pinout import Pinout
 import vmcu.pin.memory as memory
 from ctypes import c_uint32
 from enum import Enum, auto, unique
+from vmcu.test_lib.input import Input
+from vmcu.test_lib.condition import Condition
+import asyncio
 registered_encoder = []
 class Encoder:
     def __init__(self,pin1: Pinout, pin2: Pinout):
@@ -25,4 +28,49 @@ class Encoder:
     
     def increase_counter(self) -> None:
         self.set_counter(self._pin1.data.counter +1)
+    
+    class DirectionInput(Input):
+        def __init__(self,Encoder, direction):
+            self._Encoder = Encoder
+            self._direction = direction
+
+        def apply(self):
+            if not self._Encoder.get_is_on():
+                raise RuntimeError("Cannot generate a Direction with the Encoder Disable")
+            self._Encoder.set_direction(self._direction)
+
+    def generate_direction(self, direction: memory.Encoder.Direction) -> Input:
+        return self.DirectionInput(self, direction)
+    
+    class CounterInput(Input):
+        def __init__(self, Encoder, counter):
+            self._Encoder = Encoder
+            self._counter = counter
+
+        def apply(self):
+            if not self._Encoder.get_is_on():
+                raise RuntimeError("Cannot generate a Counter with the Encoder Disable")
+            self._Encoder.set_counter(self._counter)
+
+    def generate_counter(self, counter: int) -> Input:
+        return self.CounterInput(self, counter)
+    
+    class WaitForEnableCondition(Condition):
+        def __init__(self, Encoder, cond):
+            self._Encoder = Encoder
+            self._cond = cond
         
+        async def check(self) -> bool:
+            while not self._cond(self._Encoder.get_is_on()):
+                await asyncio.sleep(0)
+                pass
+            return True
+    
+    def wait_for_enable_condition(self, cond: function) -> Condition:
+        return self.WaitForEnableCondition(self, cond)
+    
+    def wait_for_enable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == True)
+    
+    def wait_for_disable(self) -> Condition:
+        return self.WaitForEnableCondition(self,lambda x: x == False)
