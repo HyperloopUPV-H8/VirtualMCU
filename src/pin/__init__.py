@@ -1,7 +1,7 @@
 from enum import Enum, auto, unique
 
 from src.pin.pinout import Pinout
-from src.pin.memory import (
+from src.vmcu.pin.memory import (
     DigitalOut,
     DigitalIn,
     ADC,

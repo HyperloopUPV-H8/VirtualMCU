@@ -1,8 +1,10 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
-from src.pin import PinType,memory
+from src.pin import PinType
 from ctypes import c_uint32
 from enum import Enum, auto, unique
+
+from src.vmcu.pin import memory
 class InputCapture:
     def __init__(self,shm:SharedMemory,pin1: Pinout):
             #make the connection between the shared_memory and the pin

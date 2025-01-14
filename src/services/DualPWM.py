@@ -1,6 +1,6 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
-import src.pin.memory as memory
+import src.vmcu.pin.memory as memory
 from ctypes import c_uint32
 from enum import Enum, auto, unique
 class DualPWM:

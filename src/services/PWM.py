@@ -1,6 +1,7 @@
 from src.shared_memory import SharedMemory
 from src.pin.pinout import Pinout
-from src.pin import PinType,memory
+from src.pin import PinType
+from src.vmcu.pin import memory
 
 class PWM:
     def __init__(self,shm: SharedMemory, pin: Pinout):
