@@ -73,10 +73,24 @@ class SPIPeripheral(ABC):
         return self.generate_send_raw(self, packet.data)
 
     def wait_for_raw(self, data: bytes) -> Condition:
-        return SPICondition(self, data)
+        return SPIWaitForPacketCondition(self, data)
+
+    def wait_for_next_raw(self, data: bytes) -> Condition:
+        return SPIReceivePacketCondition(self, data)
 
     def wait_for_packet(self, packet: SPIPacket) -> Condition:
-        return SPICondition(self, packet.data)
+        return SPIWaitForPacketCondition(self, packet.data)
+    
+    def wait_for_next_packet(self, packet: SPIPacket) -> Condition:
+        return SPIReceivePacketCondition(self, packet.data)
+
+
+class SPIConditionException(ConditionFailedException):
+    def __init__(self, message: str):
+        self._message = message
+
+    def __str__(self):
+        return self._message
 
 
 class SPIInput(Input):
@@ -88,14 +102,24 @@ class SPIInput(Input):
         self._spi.transmit(self._data)
 
 
-class SPICondition(Condition):
+class SPIReceivePacketCondition(Condition):
     def __init__(self, spi: SPIPeripheral, data: bytes):
         self._data = data
         self._spi = spi
 
     def check(self):
         if self._spi.receive() != self._data:
-            raise ConditionFailedException()
+            raise SPIConditionException("Data received through SPI doesn't mach with data expected")
+
+
+class SPIWaitForPacketCondition(Condition):
+    def __init__(self, spi: SPIPeripheral, data: bytes):
+        self._data = data
+        self._spi = spi
+
+    def check(self):
+        while self._spi.receive() != self._data:
+            pass
 
 
 class SPIMaster(SPIPeripheral):
