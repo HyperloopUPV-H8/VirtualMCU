@@ -11,6 +11,9 @@ class InputCapture:
     def set_duty_cycle(self, duty_cycle: int) -> None:
         self._pin1.data.duty_cycle = duty_cycle
         
+    def get_is_on(self) -> bool:
+        return self._pin1.data.is_on
+        
     
     def set_frequency(self,frequency: int) -> None:
         self._pin1.data.frequency = frequency

@@ -115,6 +115,14 @@ class InputCapture(PinMemoryView):
     @frequency.setter
     def frequency(self, frequency: int):
         struct.pack_into("=L", self._mem[1:5], 0,frequency)
+        
+    @property
+    def is_on(self) -> bool:
+        return struct.unpack("=?", self._mem[5:6])[0]
+
+    @is_on.setter
+    def is_on(self, is_on: bool):
+        struct.pack_into("=?", self._mem[5:6], 0,is_on)
     
     
 class PWM(PinMemoryView):
