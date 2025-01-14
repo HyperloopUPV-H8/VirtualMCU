@@ -80,7 +80,7 @@ class SPIPeripheral(ABC):
 
     def wait_for_packet(self, packet: SPIPacket) -> Condition:
         return SPIWaitForPacketCondition(self, packet.data)
-    
+
     def wait_for_next_packet(self, packet: SPIPacket) -> Condition:
         return SPIReceivePacketCondition(self, packet.data)
 
@@ -109,7 +109,9 @@ class SPIReceivePacketCondition(Condition):
 
     def check(self):
         if self._spi.receive() != self._data:
-            raise SPIConditionException("Data received through SPI doesn't mach with data expected")
+            raise SPIConditionException(
+                "Data received through SPI doesn't mach with data expected"
+            )
 
 
 class SPIWaitForPacketCondition(Condition):
