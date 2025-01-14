@@ -66,13 +66,15 @@ class SPIPeripheral(ABC):
 
     def generate_send_raw(self, data: bytes) -> Input:
         return SPIInput(self, data)
-    
-    def generate_send_packet(self, packet: SPIPacket) -> Input:
-        return generate_send_raw(self, packet.data)
+
+    def generate_send_packet(self, types: str, *data) -> Input:
+        packet = SPIPacket(types)
+        packet.build(data)
+        return self.generate_send_raw(self, packet.data)
 
     def wait_for_raw(self, data: bytes) -> Condition:
         return SPICondition(self, data)
-    
+
     def wait_for_packet(self, packet: SPIPacket) -> Condition:
         return SPICondition(self, packet.data)
 
