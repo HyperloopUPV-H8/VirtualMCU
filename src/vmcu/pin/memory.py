@@ -41,6 +41,10 @@ class ADC(PinMemoryView):
     @property
     def is_on(self) -> bool:
         return struct.unpack("=?", self._mem[2:3])[0]  
+    
+    @property
+    def resolution(self) -> int:
+        return struct.unpack("=L", self._mem[3:7])[0]
 
 class EXTI(PinMemoryView):
     @property
