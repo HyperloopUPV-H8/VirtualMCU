@@ -23,7 +23,7 @@ class SPIPacket:
             raise Exception("data size doesn't adjust to defined types")
         return struct.unpack(self._types, self.data)
 
-    def build(self, *data) -> bytes:
+    def build(self, *data):
         """Transforms the values given into binary data, ready to send through SPI
 
         Args:
