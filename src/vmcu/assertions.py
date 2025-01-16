@@ -18,10 +18,10 @@ def completes(action: function, args: Iterable[any] = (), before: float | None =
     end_time = time.time_ns()
     
     if before is not None and still_running:
-        raise TooEarlyError(msg)
+        raise TooLateError(msg)
 
     if after is not None and (end_time - start_time) < (after * NANOSECONDS):
-        raise TooLateError(msg)
+        raise TooEarlyError(msg)
 
 
 # create a function that blocks until the action returns true
