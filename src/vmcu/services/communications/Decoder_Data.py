@@ -4,20 +4,34 @@ import re
 
 import DatagramSocket
 
+def calculate_byte_size(self, measurements):
 
+    size = 0
+    for measure in measurements:
+        if measure == 'uint8' or measure == 'int8' or measure == 'bool' or 'enum' in measure:
+            size += 1
+        elif measure == 'uint16' or measure == 'int16':
+            size += 2
+        elif measure == 'uint32' or measure == 'int32' or measure == 'float32':
+            size += 4
+        elif measure == 'uint64' or measure == 'int64' or measure == 'float64':
+            size += 8
+              
+    return size
 class Decoder:
     def __init__(self, package_data, ds): #package_data its a array that contains string id and string with all measurements
         self.dict_measurement_types = {} #key string id of each measurament, contains an array from types
         self.dict_measurement_names = {} #contains array of names of each variable
         self.dict_measurement_value = {} #contains the value of each measurement
+        self.dict_measurement_size = {} #contains size for each packet 
         self.ds = ds #datagramsocket
-        
-        for data in package_data:
-            id = data[0]
-            measurements = data[1].split(',')
+
+        for id, measurements in package_data.items():
+            
+            measurements_split = measurements.split(',')
             arr_measuremets = []
             arr_names = []
-            for measure in measurements:
+            for measure in measurements_split:
                 pair = measure.split(':')
                 arr_names.append(pair[0])
                 arr_measuremets.append(pair[1])
@@ -25,13 +39,13 @@ class Decoder:
 
             self.dict_measurement_types[id] = arr_measuremets
             self.dict_measurement_names[id] = arr_names
+            self.dict_measurement_size[id] = calculate_byte_size(arr_measuremets)
 
         self.recv_packet_thread = threading.Thread(target=self._recv_packet, daemon=True)
         self.recv_packet_running = False
     
     def start(self):
         self.recv_packet_running = True
-        self.ds._running = True
         self.recv_packet_thread.start()
 
     def _recv_packet(self):
@@ -47,7 +61,7 @@ class Decoder:
                 id_packet = struct.unpack('<H',raw_data[:2])[0]
                 buff += raw_data[2:]
                 
-                bytes_size = self.calculate_byte_size(self.dict_measurement_types[id_packet])
+                bytes_size = self.dict_measurement_size[id_packet]
                 bytes_count += len(raw_data) - 2
                 wait_new_packet = False
             else:
@@ -119,20 +133,6 @@ class Decoder:
             self.dict_measurement_value[name] = data
             
 
-    def calculate_byte_size(self, measurements):
-
-        size = 0
-        for measure in measurements:
-            if measure == 'uint8' or measure == 'int8' or measure == 'bool' or 'enum' in measure:
-                size += 1
-            elif measure == 'uint16' or measure == 'int16':
-                size += 2
-            elif measure == 'uint32' or measure == 'int32' or measure == 'float32':
-                size += 4
-            elif measure == 'uint64' or measure == 'int64' or measure == 'float64':
-                size += 8
-              
-        return size
     
     def __getitem__(self, key):
         

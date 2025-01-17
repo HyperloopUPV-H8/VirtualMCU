@@ -32,6 +32,7 @@ class DatagramSocket:
         return bytes_sent
     
     def get_packet(self) -> Optional[bytes]:
+        self._running = True
         while self._running:
             try:
                 data,address = self._sock.recvfrom(MAX_SIZE_PACKET)
