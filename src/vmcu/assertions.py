@@ -3,12 +3,12 @@ from threading import Thread
 from typing import Iterable
 
 # checks that a function returns true
-def check(action: function, args: Iterable[any] = (), msg: str | None = None):
+def check(action, args: Iterable[any] = (), msg: str | None = None):
     if action(*args) == False:
         raise CheckError(msg)
 
 # checks that a function returns successfully in the specified intervals (before a timeout and/or after a min delay)
-def completes(action: function, args: Iterable[any] = (), before: float | None = None, after: float | None = None, msg: str | None = None):
+def completes(action, args: Iterable[any] = (), before: float | None = None, after: float | None = None, msg: str | None = None):
     action_thread = Thread(target=action, args=args, name="check")
 
     start_time = time.time_ns()
@@ -25,7 +25,7 @@ def completes(action: function, args: Iterable[any] = (), before: float | None =
 
 
 # create a function that blocks until the action returns true
-def wait_until_true(action: function):
+def wait_until_true(action):
     def block_until_true(args: Iterable[any] = ()):
         result = action(*args)
         while result != True:
@@ -68,12 +68,12 @@ class TestException(Exception):
 
 class CheckError(TestException):
     def __init__(self, message = None):
-        super("Check Error", message)
+        super().__init__("Check Error", message)
 
 class TooEarlyError(TestException):
     def __init__(self, message = None):
-        super("Too Early", message)
+        super().__init__("Too Early", message)
 
 class TooLateError(TestException):
     def __init__(self, message = None):
-        super("Too Late", message)
+        super().__init__("Too Late", message)
