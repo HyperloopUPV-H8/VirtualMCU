@@ -40,7 +40,8 @@ class Pin:
         PinType.ADC: ADC,
         PinType.InputCapture: InputCapture,
         PinType.Encoder: Encoder,
-        PinType.EXTI: EXTI
+        PinType.EXTI: EXTI, 
+        PinType.SPI: SPI
     }
 
     _pin_type_offset_in_memory = 0
