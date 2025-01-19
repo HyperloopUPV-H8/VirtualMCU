@@ -105,6 +105,7 @@ class SPISlave(SPIPeripheral):
         while not self._stop:
             msg = self._transmission_queue.get()
             total_sent = 0
+            sent = 0
             while total_sent < len(msg):
                 sent = self._socket.sendto(msg[sent:], self._send_address)
                 if sent == 0:
