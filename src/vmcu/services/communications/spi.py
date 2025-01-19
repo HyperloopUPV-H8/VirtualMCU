@@ -102,7 +102,7 @@ class SPIMaster(SPIPeripheral):
 
 class SPISlave(SPIPeripheral):
     def _send(self):
-        while not self._stop and self._selected:
+        while not self._stop:
             msg = self._transmission_queue.get()
             total_sent = 0
             while total_sent < len(msg):
