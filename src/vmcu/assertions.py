@@ -20,8 +20,9 @@ def completes(action, args: Iterable[any] = (), before: float | None = None, aft
     if before is not None and still_running:
         raise TooLateError(msg)
 
-    if after is not None and (end_time - start_time) < (after * NANOSECONDS):
-        raise TooEarlyError(msg)
+    took = end_time - start_time
+    if after is not None and took < (after * NANOSECONDS):
+        raise TooEarlyError(msg, took)
 
 
 # create a function that blocks until the action returns true
@@ -71,8 +72,15 @@ class CheckError(TestException):
         super().__init__("Check Error", message)
 
 class TooEarlyError(TestException):
-    def __init__(self, message = None):
+    def __init__(self, message = None, took_ns = None):
         super().__init__("Too Early", message)
+        self._took_ns = took_ns
+    
+    def __str__(self):
+        message = super().__str__()
+        if self._took_ns is not None:
+            message += f" ({self._took_ns / NANOSECONDS})"
+        return message
 
 class TooLateError(TestException):
     def __init__(self, message = None):
