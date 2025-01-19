@@ -9,5 +9,7 @@ shm = SharedMemory("gpio")
 
 slave1 = SPISlave("localhost", 50001, "localhost", 50000, shm, Pinout.PD3)
 
+slave1.transmit(b"01234567")
+
 msg = slave1.receive()
-print(msg)
+print(msg) # It must be the same data as sended
