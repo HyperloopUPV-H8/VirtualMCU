@@ -10,7 +10,7 @@ class Socket:
         self.remote_ip = rip
         self.local_port = lport
         self.remote_port = rport
-        self._running = True
+        self._running = False
         self._queue_packet_received = Queue()
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._recv_thread = threading.Thread(target=self._receive, daemon=True)
@@ -25,6 +25,7 @@ class Socket:
             print(f"Error connecting with the server : {e}")
             self.stop()
             return False
+        self._running = True  
         self._recv_thread.start()      
         return True
     
