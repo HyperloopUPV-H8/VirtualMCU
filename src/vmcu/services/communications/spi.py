@@ -4,23 +4,10 @@ from abc import ABC, abstractmethod
 from vmcu.pin.pinout import Pinout
 from vmcu.pin import PinType
 from vmcu.shared_memory import SharedMemory
+from dataclasses import dataclass
 
 
 class SPIPeripheral(ABC):
-    """
-    This is an abstract class that represent an SPI peripheral.
-    The protocol simulation has been implemented using a very simple command protocol:
-    if you are a master, you must send commands to the slave before send any packet to
-    select the slave. The commands are this:
-    - SLAVE_SELECT: this command is sended under the number '1'
-    - SLAVE_DESELECT: this command is sended under the number '2'
-    - NORMAL_PACKET: this command is sended under the number '0',
-        followed by the message intented to send.
-    To the other side, if you are a slave, you must check the command before processing the data.
-    Communication itself has been implemented using UDP protocol.
-    Messages are handled using queues and threads, one for transmission and other for reception.
-    """
-
     @abstractmethod
     def _send(self):
         pass
@@ -32,21 +19,13 @@ class SPIPeripheral(ABC):
     def __init__(self, ip: str, port: str, shm: SharedMemory):
         self._shm = shm
         self._stop = False
-        self._socket = socket.socket(
-            type=socket.SOCK_DGRAM
-        )  # Socket used to send and receive SPI data
+        self._socket = socket.socket(type=socket.SOCK_DGRAM)
         self._socket.bind((ip, port))
 
-        self._transmission_queue = (
-            queue.Queue()
-        )  # Queue used to store messages that should be sended
-        self._reception_queue = queue.Queue()  # Queue used to store received messages
-        self._transmission_thread = Thread(
-            target=self._send
-        )  # Thread that manages data transmission
-        self._reception_thread = Thread(
-            target=self._recv
-        )  # Thread that manages data reception
+        self._transmission_queue = queue.Queue()
+        self._reception_queue = queue.Queue()
+        self._transmission_thread = Thread(target=self._send)
+        self._reception_thread = Thread(target=self._recv)
 
         self._transmission_thread.start()
         self._reception_thread.start()
@@ -68,6 +47,12 @@ class SPIPeripheral(ABC):
 
 
 class SPIMaster(SPIPeripheral):
+    @dataclass
+    class MCUSlave:
+        ip: str
+        port: int
+        chip_select: Pinout
+
     def _send(self):
         while not self._stop:
             msg = self._transmission_queue.get()
@@ -87,16 +72,14 @@ class SPIMaster(SPIPeripheral):
     def __init__(self, ip: str, port: int, shm: SharedMemory):
         super().__init__(ip, port, shm)
 
-    def transmit(self, msg, ip_slave, port_slave):
-        """
-        Transmits data simulating SPI communication, considering that you are a Master.
-
-        Args:
-            msg: message to be sended
-            ip_slave: ip address of the slave you want to select and send the data
-            port_slave: port of the slave you want to select and send the data
-        """
-        self._send_address = (ip_slave, port_slave)
+    def transmit(self, msg, slave: MCUSlave):
+        self._send_address = (slave.ip, slave.port)
+        if self._chip_select != None and self._chip_select != slave.chip_select:
+            pin = self._shm.get_pin(self._chip_select)
+            pin.data.is_on = False
+        self._chip_select = slave.chip_select
+        pin = self._shm.get_pin(self._chip_select)
+        pin.data.is_on = True
         self._transmission_queue.put(msg)
 
 
@@ -117,20 +100,19 @@ class SPISlave(SPIPeripheral):
             self._reception_queue.put(self._socket.recv(1024))
 
     def __init__(
-        self, ip, port, ip_master, port_master, shm: SharedMemory, SS: Pinout = None
+        self, ip, port, ip_master, port_master, shm: SharedMemory, CS: Pinout = None
     ):
-        self._selected = False  # Flag used to control that we send data only if we are selected by the master
         super().__init__(ip, port, shm)
         self._send_address = (
             ip_master,
             port_master,
-        )  # Address of the client that should receive de data sended
-        self._chip_select = SS  # MCU Slave select Pin "connected" to this peripheral. It has sense only if the master is a MCU
+        )
+        self._chip_select = CS  # MCU Chip Select Pin "connected" to this peripheral. It has sense only if the master is a MCU
 
     def _is_selected(self) -> bool:
         """
         Returns:
-            bool: if this peripheral is selected, meaning that it has his SS Pin activated in Shared Memory
+            bool: if this peripheral is selected, meaning that it has his CS Pin activated in Shared Memory
         """
         pin = self._shm.get_pin(pin=self._chip_select, pin_type=PinType.SPI)
         return pin.data.is_on
