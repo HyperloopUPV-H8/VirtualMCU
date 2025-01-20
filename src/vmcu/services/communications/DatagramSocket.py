@@ -14,12 +14,13 @@ class DatagramSocket:
         self.remote_port = rport
         self._queue_packet_received = Queue()
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        self._sock.bind((self.local_ip,self.local_port))
         self._sock.settimeout(TIMEOUT_TIME) 
-        self._running = True
-        self._recv_thread = threading.Thread(target=self._receive, daemon=True)
-        self._recv_thread.start()      
+        self._recv_thread = threading.Thread(target=self._receive, daemon=True)   
     
+    def connect(self):
+        self._sock.bind((self.local_ip,self.local_port))
+        self._running = True
+        self._recv_thread.start()   
     def _receive(self): 
         while self._running:
             try:
