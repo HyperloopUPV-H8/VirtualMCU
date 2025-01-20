@@ -51,8 +51,6 @@ class Pin:
         self._pin = pin
         self._mem = Pin._get_memory_view(pin, shm)
 
-        print("PinType", pin_type)
-
         if (pin_type != None):
             self._check_type_is_same_as(pin_type)
         self._type = pin_type
@@ -69,7 +67,7 @@ class Pin:
 
     # returns a memoryview of the exact bytes that represent this pin
     def _get_memory_view(pin: Pinout, shm: memoryview) -> memoryview:
-        from shared_memory import SharedMemory
+        from vmcu.shared_memory import SharedMemory
         base_address = pin.value * SharedMemory.pin_size_in_memory
         return shm[base_address:base_address + SharedMemory.pin_size_in_memory]
 
