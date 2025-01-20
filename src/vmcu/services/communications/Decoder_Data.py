@@ -2,9 +2,7 @@ import threading
 import struct
 import re
 
-import DatagramSocket
-
-def calculate_byte_size(self, measurements):
+def calculate_byte_size(measurements):
 
     size = 0
     for measure in measurements:
@@ -51,33 +49,42 @@ class Decoder:
     def _recv_packet(self):
         buff = bytearray()
         id_packet = 0
-        bytes_count = 0
         bytes_size = 0
         wait_new_packet = True
 
         while self.recv_packet_running:
-            raw_data = self.ds.get_packet() #get_packet must to be blocking
-            if wait_new_packet:
-                id_packet = struct.unpack('<H',raw_data[:2])[0]
-                buff += raw_data[2:]
-                
-                bytes_size = self.dict_measurement_size[id_packet]
-                bytes_count += len(raw_data) - 2
-                wait_new_packet = False
-            else:
+            try:
+                raw_data = self.ds.get_packet()
                 buff += raw_data
-                bytes_count += len(raw_data)
+                if wait_new_packet:
+                    id_packet = struct.unpack('<H',buff[:2])[0]
+                    buff = buff[2:]
+                    
+                    bytes_size = self.dict_measurement_size[id_packet]
+                    wait_new_packet = False
 
-            if bytes_count < bytes_size:
-                continue
-            else:
-                if bytes_count == bytes_size:
-                    self.deserialize(buff, id_packet)
+                while len(buff) >= bytes_size and len(buff)>0:
+                    data_buff = buff[:bytes_size]
+                    buff = buff[bytes_size:]
+                    self.deserialize(data_buff, id_packet)
 
+                    if len(buff) >= 2:
+                        id_packet = struct.unpack('<H',buff[:2])[0]
+                        buff = buff[2:]
+                        bytes_size = self.dict_measurement_size[id_packet]
+                    else:  
+                        bytes_size = 0
+                        wait_new_packet = True
+            except KeyError as e:
+                print(f"Error to obtain key: {e}")
                 buff.clear()
-                bytes_count = 0
-                bytes_size = 0
-                wait_new_packet = True  
+                bytes_size=0
+                wait_new_packet = True
+            except struct.error as e:
+                print(f'Unpacking error: {e}')
+                buff.clear()
+                bytes_size=0
+                wait_new_packet = True
 
 
             
