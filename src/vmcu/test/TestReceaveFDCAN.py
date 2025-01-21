@@ -1,6 +1,6 @@
 from vmcu.services.communications.FDCAN import FDCAN
 from vmcu.shared_memory import SharedMemory
-from VirtualMCU.src.vmcu.pin.pinout import Pinout 
+from vmcu.pin.pinout import Pinout 
 import time
 
 
