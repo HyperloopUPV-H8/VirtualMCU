@@ -1,5 +1,5 @@
-from  VirtualMCU.src.vmcu.shared_memory import SharedMemory
-from  VirtualMCU.src.vmcu.pin import Pinout,PinType,FDCAN
+from  vmcu.shared_memory import SharedMemory
+from  vmcu.pin import Pinout,PinType,FDCAN
 from enum import Enum
 import socket
 
@@ -89,7 +89,7 @@ class FDCAN:
         pack=Packet(aux_identifier, aux_dlc)
         for i in range(8,aux_dlc+8):
             pack.rx_data += aux_data[i].to_bytes(1, 'big')
-        #pack.rx_data = aux_data[8:]
+        
         return pack
             
             
