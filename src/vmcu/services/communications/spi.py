@@ -70,24 +70,25 @@ class SPIMaster(SPIPeripheral):
             self._reception_queue.put(received)
 
     def __init__(self, ip: str, port: int, shm: SharedMemory):
+        self._chip_select = None
         super().__init__(ip, port, shm)
 
     def transmit(self, msg, slave: MCUSlave):
         self._send_address = (slave.ip, slave.port)
         if self._chip_select != None and self._chip_select != slave.chip_select:
-            pin = self._shm.get_pin(self._chip_select)
+            pin = self._shm.get_pin(self._chip_select, pin_type=PinType.SPI)
             pin.data.is_on = False
         self._chip_select = slave.chip_select
-        pin = self._shm.get_pin(self._chip_select)
+        pin = self._shm.get_pin(self._chip_select, pin_type=PinType.SPI)
         pin.data.is_on = True
         self._transmission_queue.put(msg)
     
     def chip_select_on(self, slave: MCUSlave):
-        pin = self._shm.get_pin(slave.chip_select)
+        pin = self._shm.get_pin(slave.chip_select, pin_type=PinType.SPI)
         pin.data.is_on = True
 
     def chip_select_off(self, slave: MCUSlave):
-        pin = self._shm.get_pin(slave.chip_select)
+        pin = self._shm.get_pin(slave.chip_select, pin_type=PinType.SPI)
         pin.data.is_on = False
 
 class SPISlave(SPIPeripheral):
