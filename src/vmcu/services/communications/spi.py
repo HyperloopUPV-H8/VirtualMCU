@@ -81,7 +81,14 @@ class SPIMaster(SPIPeripheral):
         pin = self._shm.get_pin(self._chip_select)
         pin.data.is_on = True
         self._transmission_queue.put(msg)
+    
+    def chip_select_on(self, slave: MCUSlave):
+        pin = self._shm.get_pin(slave.chip_select)
+        pin.data.is_on = True
 
+    def chip_select_off(self, slave: MCUSlave):
+        pin = self._shm.get_pin(slave.chip_select)
+        pin.data.is_on = False
 
 class SPISlave(SPIPeripheral):
     def _send(self):
@@ -128,7 +135,7 @@ class SPISlave(SPIPeripheral):
         Args:
             msg: message to send through SPI
         """
-        if self._chip_select != None and self._is_selected():
+        if self._chip_select == None or self._is_selected():
             self._transmission_queue.put(msg)
         else:
             raise Exception("This peripheral is not selected")
@@ -141,7 +148,7 @@ class SPISlave(SPIPeripheral):
         you must check that your peripheral is selected, using is_selected function.
         If this peripheral is not selected, this function raises an exception.
         """
-        if self._chip_select != None and self._is_selected():
+        if self._chip_select == None or self._is_selected():
             return super().receive()
         else:
             raise Exception("This peripheral is not selected")
