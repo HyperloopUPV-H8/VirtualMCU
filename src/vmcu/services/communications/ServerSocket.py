@@ -10,16 +10,19 @@ class Server:
         self.local_ip = ip
         self.port = port
         self._server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self._server.bind((self.local_ip,self.port))
-        self._running = True
+        self._running = False
         self.connections = {} #dictionary: key = client_address value = connection
         self.recv_clients_threads =[]
         self._queue_packet_receive_dictionary = {} #this dictionary will have key = connection value = queue of the packets received
+        self._accept_thread = None
+        
+    def start_server(self):
+        self._server.bind((self.local_ip,self.port))
+        self._server.settimeout(TIMEOUT_TIME)  
         self._accept_thread = threading.Thread(target=self._accept, daemon=True)
-        self._server.settimeout(TIMEOUT_TIME)
+        self._running = True
         self._accept_thread.start()
-        
-        
+           
     def _accept(self) : 
         self._server.listen(MAX_LISTEN_CONNECTIONS)
         while self._running:
