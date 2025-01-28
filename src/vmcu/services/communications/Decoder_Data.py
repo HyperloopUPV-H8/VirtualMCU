@@ -18,10 +18,10 @@ def calculate_byte_size(measurements):
     return size
 class Decoder:
     def __init__(self, package_data, ds): #package_data its a array that contains string id and string with all measurements
-        self.dict_measurement_types = {} #key string id of each measurament, contains an array from types
-        self.dict_measurement_names = {} #contains array of names of each variable
-        self.dict_measurement_value = {} #contains the value of each measurement
-        self.dict_measurement_size = {} #contains size for each packet 
+        self.measurement_types = {} #key string id of each measurament, contains an array from types
+        self.measurement_names = {} #contains array of names of each variable
+        self.measurement_value = {} #contains the value of each measurement
+        self.measurement_size = {} #contains size for each packet 
         self.ds = ds #datagramsocket
 
         for id, measurements in package_data.items():
@@ -33,11 +33,11 @@ class Decoder:
                 pair = measure.split(':')
                 arr_names.append(pair[0])
                 arr_measuremets.append(pair[1])
-                self.dict_measurement_value[pair[0]] = None
+                self.measurement_value[pair[0]] = None
 
-            self.dict_measurement_types[id] = arr_measuremets
-            self.dict_measurement_names[id] = arr_names
-            self.dict_measurement_size[id] = calculate_byte_size(arr_measuremets)
+            self.measurement_types[id] = arr_measuremets
+            self.measurement_names[id] = arr_names
+            self.measurement_size[id] = calculate_byte_size(arr_measuremets)
 
         self.recv_packet_thread = threading.Thread(target=self._recv_packet, daemon=True)
         self.recv_packet_running = False
@@ -60,7 +60,7 @@ class Decoder:
                     id_packet = struct.unpack('<H',buff[:2])[0]
                     buff = buff[2:]
                     
-                    bytes_size = self.dict_measurement_size[id_packet]
+                    bytes_size = self.measurement_size[id_packet]
                     wait_new_packet = False
 
                 while len(buff) >= bytes_size and len(buff)>0:
@@ -71,7 +71,7 @@ class Decoder:
                     if len(buff) >= 2:
                         id_packet = struct.unpack('<H',buff[:2])[0]
                         buff = buff[2:]
-                        bytes_size = self.dict_measurement_size[id_packet]
+                        bytes_size = self.measurement_size[id_packet]
                     else:  
                         bytes_size = 0
                         wait_new_packet = True
@@ -91,7 +91,7 @@ class Decoder:
                 
     def deserialize(self, buffer, id_packet):
 
-        for type, name in zip(self.dict_measurement_types[id_packet], self.dict_measurement_names[id_packet]):
+        for type, name in zip(self.measurement_types[id_packet], self.measurement_names[id_packet]):
             data = None
             match type:
                 case "bool":
@@ -137,14 +137,14 @@ class Decoder:
                     else:
                         raise ValueError(f"Unsupported data type: {type}")
             
-            self.dict_measurement_value[name] = data
+            self.measurement_value[name] = data
             
 
     
     def __getitem__(self, key):
         
-        if key in self.dict_measurement_value:
-            return self.dict_measurement_value[key]
+        if key in self.measurement_value:
+            return self.measurement_value[key]
         else:
             print("The key is not include in the dictionary")
             return None
