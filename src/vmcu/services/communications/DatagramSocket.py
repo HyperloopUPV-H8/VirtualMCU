@@ -14,9 +14,12 @@ class DatagramSocket:
         self.remote_port = rport
         self._queue_packet_received = Queue()
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self._sock.settimeout(TIMEOUT_TIME)  
+    
+    def connect(self):
         self._sock.bind((self.local_ip,self.local_port))
         self._sock.settimeout(TIMEOUT_TIME) 
-        self._running = False                  
+        self._running = True                 
                
     def transmit(self, buf: bytes) -> int: 
         bytes_sent = 0
@@ -30,7 +33,6 @@ class DatagramSocket:
         return bytes_sent
     
     def get_packet(self) -> Optional[bytes]:
-        self._running = True
         while self._running:
             try:
                 data,address = self._sock.recvfrom(MAX_SIZE_PACKET)
