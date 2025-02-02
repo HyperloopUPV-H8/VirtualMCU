@@ -1,4 +1,4 @@
-from vmcu import pin
+from vmcu import pin.PinType
 from vmcu.shared_memory import SharedMemory
 from vmcu.pin.pinout import Pinout
 from ctypes import c_uint32
@@ -8,8 +8,8 @@ from enum import Enum, auto, unique
 class DualPWM:
     def __init__(self, pin1: Pinout, pin2: Pinout, shm: SharedMemory):
         # register the pins
-        self._pin1 = shm.get_pin(pin1, pin.PinType.DualPWM)
-        self._pin2 = shm.get_pin(pin2, pin.PinType.DualPWM)
+        self._pin1 = shm.get_pin(pin1, PinType.DualPWM)
+        self._pin2 = shm.get_pin(pin2, PinType.DualPWM)
 
     def get_is_on(self) -> bool:
         return self._pin1.data.is_on
