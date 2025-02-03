@@ -29,8 +29,6 @@ class PinType(Enum):
     EXTI = 10
     Ethernet= 11
 
-class DualPWM: ...
-
 class Pin:
     _pin_type_to_representation = {
         PinType.DigitalOut: DigitalOut,
