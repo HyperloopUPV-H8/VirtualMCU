@@ -2,17 +2,17 @@ import struct
 
 
 class Packets:
-    def __init__(self,packets): 
-        self._dict_packets = packets #dictionary for the packets
-        self._enum_vector = [[] for _ in range(len(self._dict_packets))] #list of list of strings the index = id_packet 
-        
-        for packet_id,packet in self._dict_packets.items():
+    def __init__(self, packets):
+        self._dict_packets = packets  # dictionary for the packets
+        self._enum_vector = {}
+
+        for packet_id, packet in self._dict_packets.items():
             for data_type in packet:
                 if "enum" in data_type:
-                    start = data_type.index('(') +1
-                    end = data_type.index(')')
-                    variants = data_type[start:end].split(',')
-                    self._enum_vector[packet_id].append(variants)
+                    start = data_type.index("(") + 1
+                    end = data_type.index(")")
+                    variants = data_type[start:end].split(",")
+                    self._enum_vector.setdefault(packet_id, []).append(variants)
 
     
     def validate_packet(self,packet_id,values):
