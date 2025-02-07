@@ -69,24 +69,23 @@ class Packets:
                     raise ValueError(f"Unsupported data type: {data_type}") 
         return binary_packet
     
-    def validate_enum(self,value,enums_visited,packet_id) -> int:
-        if packet_id >= len(self._enum_vector) or enums_visited >= len(self._enum_vector[packet_id]):
-            raise IndexError(f"Invalid enum access: packet_id {packet_id}, number of enum: {enums_visited}")
-        
+    def validate_enum(self, value, enums_visited, packet_id) -> int:
         list_enum_packets = self._enum_vector[packet_id]
         enum_variants = list_enum_packets[enums_visited]
-            
-        if isinstance(value,str):
-          
+
+        if isinstance(value, str):
+
             if value in enum_variants:
                 return enum_variants.index(value)
             else:
                 raise ValueError(f"Value: {value} no se encuentra en el enum")
-                
-        if isinstance(value,int) and (0 <= value <= len(enum_variants)):
+
+        if isinstance(value, int) and (0 <= value <= len(enum_variants)):
             return value
-        
-        raise ValueError(f"Invalid enum value: {value}. Must be a valid string or integer within enum range.")
+
+        raise ValueError(
+            f"Invalid enum value: {value}. Must be a valid string or integer within enum range."
+        )
         
     
     def validate_uint8(self,value):
