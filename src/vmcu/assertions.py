@@ -27,12 +27,15 @@ def completes(action, args: Iterable[any] = (), before: float | None = None, aft
 
 # create a function that blocks until the action returns true
 def wait_until_true(action):
-    def block_until_true(args: Iterable[any] = ()):
-        result = action(*args)
-        while result != True:
+    def wrapper(args: Iterable[any] = ()):
+        def block_until_true():
             result = action(*args)
-    
-    return block_until_true
+            while not result:
+                result = action(*args)
+
+        return block_until_true
+
+    return wrapper
 
 SECONDS = 1
 MILLISECONDS = 1000 * SECONDS
