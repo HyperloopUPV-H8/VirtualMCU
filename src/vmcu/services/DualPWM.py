@@ -1,4 +1,4 @@
-from vmcu import pin.PinType
+from vmcu.pin import PinType
 from vmcu.shared_memory import SharedMemory
 from vmcu.pin.pinout import Pinout
 from ctypes import c_uint32
