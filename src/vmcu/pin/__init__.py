@@ -29,8 +29,6 @@ class PinType(Enum):
     EXTI = 10
     Ethernet= 11
 
-class DualPWM: ...
-
 class Pin:
     _pin_type_to_representation = {
         PinType.DigitalOut: DigitalOut,
@@ -40,7 +38,8 @@ class Pin:
         PinType.ADC: ADC,
         PinType.InputCapture: InputCapture,
         PinType.Encoder: Encoder,
-        PinType.EXTI: EXTI
+        PinType.EXTI: EXTI, 
+        PinType.SPI: SPI
     }
 
     _pin_type_offset_in_memory = 0
@@ -50,8 +49,6 @@ class Pin:
     def __init__(self, pin: Pinout, shm: memoryview, pin_type: PinType):
         self._pin = pin
         self._mem = Pin._get_memory_view(pin, shm)
-
-        print("PinType", pin_type)
 
         if (pin_type != None):
             self._check_type_is_same_as(pin_type)
@@ -69,7 +66,7 @@ class Pin:
 
     # returns a memoryview of the exact bytes that represent this pin
     def _get_memory_view(pin: Pinout, shm: memoryview) -> memoryview:
-        from shared_memory import SharedMemory
+        from vmcu.shared_memory import SharedMemory
         base_address = pin.value * SharedMemory.pin_size_in_memory
         return shm[base_address:base_address + SharedMemory.pin_size_in_memory]
 
