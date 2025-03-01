@@ -170,4 +170,7 @@ class SPI(PinMemoryView):
         struct.pack_into("=?", self._mem[0:1], 0,is_on)
     
 class FDCAN(PinMemoryView):
-    None
+    @property
+    def is_on(self) -> bool:
+        return struct.unpack("=?", self._mem[0:1])[0]
+    

@@ -62,6 +62,8 @@ class FDCAN:
         self._sock.bind((self._ip,self._port))
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
+        if(self._TX.data.is_on == False and self._RX.data.is_on == False):
+            return False
         data_length = self.dlc_to_len[data_length]
         aux_data = b""
         aux_data += message_id.to_bytes(4, 'big')
@@ -73,6 +75,8 @@ class FDCAN:
         return True
         
     def read(self )-> "Packet":
+        if(self._TX.data.is_on == False and self._RX.data.is_on == False):
+            return False
         aux_data = b""
         bytes_recv = 0
         aux_dlc = 72
