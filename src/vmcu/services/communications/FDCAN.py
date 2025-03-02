@@ -76,7 +76,7 @@ class FDCAN:
         
     def read(self )-> "Packet":
         if(self._TX.data.is_on == False and self._RX.data.is_on == False):
-            return False
+            return None
         aux_data = b""
         bytes_recv = 0
         aux_dlc = 72
