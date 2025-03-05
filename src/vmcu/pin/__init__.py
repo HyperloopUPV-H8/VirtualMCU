@@ -39,12 +39,13 @@ class Pin:
         PinType.InputCapture: InputCapture,
         PinType.Encoder: Encoder,
         PinType.EXTI: EXTI, 
-        PinType.SPI: SPI
+        PinType.SPI: SPI,
+        PinType.FDCAN: FDCAN
     }
 
     _pin_type_offset_in_memory = 0
 
-    _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM | SPI
+    _data: DigitalOut | DigitalIn | ADC | EXTI | Encoder | InputCapture | PWM | DualPWM | SPI | FDCAN
 
     def __init__(self, pin: Pinout, shm: memoryview, pin_type: PinType):
         self._pin = pin

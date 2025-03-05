@@ -1,5 +1,5 @@
-from vmcu.shared_memory import SharedMemory
-from vmcu.pin import Pinout,PinType,FDCAN
+from  vmcu.shared_memory import SharedMemory
+from  vmcu.pin import Pinout,PinType,FDCAN
 from enum import Enum
 import socket
 
@@ -62,27 +62,25 @@ class FDCAN:
         self._sock.bind((self._ip,self._port))
         
     def transmit(self, message_id: int, data:list[bytes], data_length: "FDCAN.DLC")->bool:
+        if(self._TX.data.is_on == False and self._RX.data.is_on == False):
+            return False
         data_length = self.dlc_to_len[data_length]
         aux_data = b""
-        aux_data += ((message_id >> 24) & 0xFF).to_bytes(1, 'big')
-        aux_data += ((message_id >> 16) & 0xFF).to_bytes(1, 'big')
-        aux_data += ((message_id >> 8) & 0xFF).to_bytes(1, 'big')
-        aux_data += (message_id & 0xFF).to_bytes(1, 'big')
-        aux_data += ((data_length >> 24) & 0xFF).to_bytes(1, 'big')
-        aux_data += ((data_length >> 16) & 0xFF).to_bytes(1, 'big')
-        aux_data += ((data_length >> 8) & 0xFF).to_bytes(1, 'big')
-        aux_data += ((data_length & 0xFF).to_bytes(1, 'big'))
-        aux_data += data
+        aux_data += message_id.to_bytes(4, 'big')
+        aux_data += data_length.to_bytes(4, 'big')
+        aux_data +=data
         sent = self._sock.sendto(aux_data, (self._ip, self._sendport))
         if sent <=0:
             return False
         return True
         
     def read(self )-> "Packet":
+        if(self._TX.data.is_on == False and self._RX.data.is_on == False):
+            return None
         aux_data = b""
         bytes_recv = 0
         aux_dlc = 72
-        while bytes_recv < aux_dlc: 
+        while bytes_recv < (aux_dlc+8): 
             chunk_aux_data = b""
             chunk_aux_data,_= self._sock.recvfrom(1024)
             if len(chunk_aux_data) <= 0:
@@ -92,10 +90,10 @@ class FDCAN:
             aux_identifier= (aux_data[0] << 24) | (aux_data[1] << 16) | (aux_data[2] << 8) | aux_data[3]
             aux_dlc = ((aux_data[4] << 24) | (aux_data[5] << 16) | (aux_data[6] << 8) | aux_data[7])
         
-        aux_identifier= (aux_data[0] << 24) | (aux_data[1] << 16) | (aux_data[2] << 8) | aux_data[3]
-        aux_dlc = ((aux_data[4] << 24) | (aux_data[5] << 16) | (aux_data[6] << 8) | aux_data[7])
         pack=Packet(aux_identifier, aux_dlc)
-        pack.rx_data = aux_data[8:]
+        for i in range(8,aux_dlc+8):
+            pack.rx_data += aux_data[i].to_bytes(1, 'big')
+        
         return pack
             
             
